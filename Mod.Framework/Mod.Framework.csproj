@@ -77,6 +77,7 @@
     <Compile Include="Extensions\Hooking.Extensions.cs" />
     <Compile Include="Glob.cs" />
     <Compile Include="InstructionReference.cs" />
+    <Compile Include="AssemblyTargetAttribute.cs" />
     <Compile Include="NugetAssemblyResolver.cs" />
     <Compile Include="QueryResult.cs" />
     <Compile Include="TypeMeta.cs" />

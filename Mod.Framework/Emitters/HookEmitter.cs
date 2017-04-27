@@ -88,7 +88,11 @@ namespace Mod.Framework.Emitters
 
 						if (_method.Parameters.Count > 0)
 						{
-							call_invoke = call_invoke.Create(OpCodes.Ldarg, _method.Parameters.First());
+							var first = _method.Parameters.First();
+							call_invoke = call_invoke.Create(
+								_is_by_reference && first.ParameterType.IsValueType ? OpCodes.Ldarga : OpCodes.Ldarg,
+								first
+							);
 							collection = new object[]
 							{
 								call_invoke,
@@ -133,7 +137,11 @@ namespace Mod.Framework.Emitters
 
 						if (_method.Parameters.Count > 0)
 						{
-							call_invoke = call_invoke.Create(OpCodes.Ldarg, _method.Parameters.First());
+							var first = _method.Parameters.First();
+							call_invoke = call_invoke.Create(
+								_is_by_reference && first.ParameterType.IsValueType ? OpCodes.Ldarga : OpCodes.Ldarg,
+								first
+							);
 							collection = new object[]
 							{
 								call_invoke,

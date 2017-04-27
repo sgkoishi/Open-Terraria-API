@@ -6,6 +6,7 @@ namespace Mod.Framework
 	public enum HookFlags : byte
 	{
 		Default = Pre | Post | Cancellable | PreReferenceParameters | AlterResult,
+		None = 0,
 
 		Pre = 1,
 		Post = 2,

@@ -1,4 +1,5 @@
 ﻿using Mono.Cecil;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Mod.Framework.Emitters
@@ -18,7 +19,9 @@ namespace Mod.Framework.Emitters
 
 		public TypeDefinition Emit()
 		{
-			var delegate_parameters = _method.Parameters.ToList();
+			var delegate_parameters = _method.Parameters
+				.Select(x => new ParameterDefinition(x.Name, x.Attributes, x.ParameterType))
+				.ToList();
 
 			if ((_flags & HookFlags.PreReferenceParameters) != 0)
 			{

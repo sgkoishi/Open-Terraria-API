@@ -2,6 +2,7 @@
 
 namespace Mod.Framework
 {
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 	public class ModuleAttribute : Attribute
 	{
 		public string Name { get; set; }

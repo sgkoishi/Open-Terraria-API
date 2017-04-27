@@ -18,6 +18,49 @@ namespace OTAPI.Patcher.Modules
 			_modder = modder;
 		}
 
+		private HookFlags ParseFromPattern(ref string pattern)
+		{
+			var flags = HookFlags.None;
+			var segments = pattern.Split('$');
+
+			if (segments.Length == 2)
+			{
+				// valid
+				pattern = segments[0];
+
+				var character_flags = segments[1].ToCharArray();
+				foreach(var flag in character_flags)
+				{
+					switch(flag)
+					{
+						case 'b': // begin hook
+							flags |= HookFlags.Pre;
+							break;
+						case 'e': // end hook
+							flags |= HookFlags.Post;
+							break;
+						case 'r': // reference parameters
+							flags |= HookFlags.PreReferenceParameters;
+							break;
+						case 'c': // begin hook can cancel
+							flags |= HookFlags.Cancellable;
+							break;
+						case 'a': // begin hook can alter non-void method return value
+							flags |= HookFlags.AlterResult;
+							break;
+						default:
+							throw new Exception($"Assembly Modification Pattern Flag is not valid: `{flag}`");
+					}
+				}
+			}
+			else if (segments.Length > 2)
+			{
+				throw new Exception("Assembly Modification Patterns (AMP) only support flags defined at the end of the pattern");
+			}
+
+			return flags;
+		}
+
 		public override void Run()
 		{
 			List<string> inputs = new List<string>();
@@ -29,23 +72,13 @@ namespace OTAPI.Patcher.Modules
 			var args = Environment.GetCommandLineArgs().Skip(1);
 			if (args.Count() == 0)
 			{
-#if SLN_CLIENT
-				args = new[]
-				{
-					@"-in=../../../wrap/Terraria/Terraria.exe",
-					@"-mod=../../../OTAPI.Modifications/OTAPI.**/bin/Debug/OTAPI.**.dll",
-					@"-o=../../../OTAPI.dll"
-				};
-#else
 				args = new[]
 				{
 					//@"-m=[TerrariaServer]Terraria.*,[TerrariaServer]ReLogic.*/rbe",
-					@"-m=Terraria.Chest.Find*",
-					@"-m=Terraria.Main.Initialize()",
-					//@"-a=../../../OTAPI.Modifications/OTAPI.**/bin/Debug/OTAPI.**.dll",
+					@"-m=Terraria.Chest.Find*$ber",
+					@"-m=Terraria.Main.Initialize()$bec",
 					@"-a=../../../TerrariaServer.exe",
 				};
-#endif
 			}
 
 			options = new OptionSet();
@@ -64,11 +97,13 @@ namespace OTAPI.Patcher.Modules
 
 			_modder.LoadFileModules(inputs.ToArray());
 
-			foreach(var pattern in modifications )
+			foreach (var pattern in modifications)
 			{
-				var res = new Query(pattern, _modder.CecilAssemblies)
+				string query_pattern = pattern;
+				var flags = ParseFromPattern(ref query_pattern);
+				var res = new Query(query_pattern, _modder.CecilAssemblies)
 					.Run()
-					.Hook(HookFlags.Pre | HookFlags.Post | HookFlags.PreReferenceParameters) // parse from pattern
+					.Hook(flags)
 				;
 			}
 

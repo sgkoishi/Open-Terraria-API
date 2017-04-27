@@ -138,6 +138,7 @@ namespace Mod.Framework.Extensions
 			if (nested_type == null)
 			{
 				nested_type = new TypeDefinition(String.Empty, name, attributes);
+				nested_type.BaseType = type.Module.TypeSystem.Object;
 				type.NestedTypes.Add(nested_type);
 			}
 			return nested_type;
@@ -145,13 +146,17 @@ namespace Mod.Framework.Extensions
 
 		public static TypeDefinition GetHooksType(this TypeDefinition type)
 		{
-			return type.AddOrGetNestedType("ModHooks", TypeAttributes.NestedPublic | TypeAttributes.Abstract | TypeAttributes.Sealed);
+			return type.AddOrGetNestedType("ModHooks",
+				TypeAttributes.NestedPublic | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit
+			);
 		}
 
 		public static TypeDefinition GetHooksDelegateType(this TypeDefinition type)
 		{
 			var hooks_type = GetHooksType(type);
-			return hooks_type.AddOrGetNestedType("ModHandlers", TypeAttributes.NestedPublic | TypeAttributes.Abstract | TypeAttributes.Sealed);
+			return hooks_type.AddOrGetNestedType("ModHandlers",
+				TypeAttributes.NestedPublic | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit
+			);
 		}
 
 		public static MethodDefinition Clone(this MethodDefinition method)

@@ -110,6 +110,11 @@ namespace Mod.Framework
 		{
 			foreach (RunnableModule module in _kernel.GetAll<RunnableModule>().OrderBy(x => x.Order))
 			{
+				module.Assemblies = module.AssemblyTargets.Count() == 0 ?
+					this.CecilAssemblies
+					: this.CecilAssemblies.Where(asm => module.AssemblyTargets.Any(t => t == asm.FullName))
+				;
+
 				Console.WriteLine($"\t-> Running module: {module.Name}");
 				module.Run();
 			}

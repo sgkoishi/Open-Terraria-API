@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="Extensions\Modder.Extensions.cs" />
     <Compile Include="Modules\CLI.cs" />
+    <Compile Include="Modules\MakeTypesPublic.cs" />
     <Compile Include="Modules\Save.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
