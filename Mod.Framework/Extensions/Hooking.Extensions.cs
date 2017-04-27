@@ -95,9 +95,24 @@ namespace Mod.Framework.Extensions
 				method.Name += "Direct";
 				method.DeclaringType.Methods.Add(new_method);
 
+				var processor = new_method.Body.GetILProcessor();
+				var ins_return = Instruction.Create(OpCodes.Ret);
+				processor.Append(ins_return);
+
 				var call_emitter = new CallEmitter(new_method, method, new_method.Body.Instructions.First());
 
 				var call = call_emitter.Emit();
+
+				VariableDefinition return_variable = null;
+				var nop = call.Instructions
+					.SingleOrDefault(x => x.OpCode == OpCodes.Pop); // expect one here as the CallEmitter should only handle one. if it changes this needs to change
+				if (nop != null)
+				{
+					return_variable = new VariableDefinition("direct_result", method.ReturnType);
+					new_method.Body.Variables.Add(return_variable);
+					nop.Operand = return_variable;
+					nop.OpCode = OpCodes.Stloc_S;
+				}
 				call.MergeInto(new_method, 0);
 
 				if ((flags & HookFlags.Pre) != 0)
@@ -124,6 +139,11 @@ namespace Mod.Framework.Extensions
 					//last_ret.ReplaceTransfer(hook.Instructions.First(), new_method);
 
 					hook.MergeInto(new_method, call.Instructions.Last().Next);
+				}
+
+				if (return_variable != null)
+				{
+					processor.InsertBefore(ins_return, Instruction.Create(OpCodes.Ldloc, return_variable));
 				}
 			}
 
@@ -159,7 +179,7 @@ namespace Mod.Framework.Extensions
 			);
 		}
 
-		public static MethodDefinition Clone(this MethodDefinition method)
+		public static MethodDefinition Clone(this MethodDefinition method, bool add_return = false)
 		{
 			var clone = new MethodDefinition(method.Name, method.Attributes, method.ReturnType);
 
@@ -168,7 +188,8 @@ namespace Mod.Framework.Extensions
 				clone.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes, param.ParameterType));
 			}
 
-			clone.AddReturn();
+			if (add_return)
+				clone.AddReturn();
 
 			return clone;
 		}

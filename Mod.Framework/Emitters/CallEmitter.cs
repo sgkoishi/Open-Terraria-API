@@ -44,6 +44,13 @@ namespace Mod.Framework.Emitters
 				new { OpCodes.Call, _callback }
 			));
 
+			if (_method.ReturnType.FullName != "System.Void")
+			{
+				instructions.AddRange(Extensions.CecilExtensions.ParseAnonymousInstruction(
+					new { OpCodes.Pop }
+				));
+			}
+
 			return new MergableMethod()
 			{
 				Instructions = instructions
