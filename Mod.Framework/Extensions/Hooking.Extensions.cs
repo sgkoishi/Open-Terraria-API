@@ -94,6 +94,7 @@ namespace Mod.Framework.Extensions
 				// rename method to be suffixed with Direct
 				method.Name += "Direct";
 				method.DeclaringType.Methods.Add(new_method);
+				method.Attributes &= ~MethodAttributes.Virtual;
 
 				var processor = new_method.Body.GetILProcessor();
 				var ins_return = Instruction.Create(OpCodes.Ret);
