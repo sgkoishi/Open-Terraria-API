@@ -100,7 +100,7 @@ namespace Mod.Framework.Extensions
 				var ins_return = Instruction.Create(OpCodes.Ret);
 				processor.Append(ins_return);
 
-				var call_emitter = new CallEmitter(new_method, method, new_method.Body.Instructions.First());
+				var call_emitter = new CallEmitter(method, new_method.Body.Instructions.First());
 
 				var call = call_emitter.Emit();
 

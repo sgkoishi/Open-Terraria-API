@@ -4,16 +4,17 @@ using System.Collections.Generic;
 
 namespace Mod.Framework.Emitters
 {
+	/// <summary>
+	/// This emitter will 
+	/// </summary>
 	public class CallEmitter : IEmitter<MergableMethod>
 	{
-		private MethodDefinition _method;
 		private MethodDefinition _callback;
 		private Instruction _insert_before;
 		public bool _reference_args;
 
-		public CallEmitter(MethodDefinition method, MethodDefinition callback, Instruction insert_before)
+		public CallEmitter(MethodDefinition callback, Instruction insert_before)
 		{
-			this._method = method;
 			this._callback = callback;
 			this._insert_before = insert_before;
 		}
@@ -44,7 +45,7 @@ namespace Mod.Framework.Emitters
 				new { OpCodes.Call, _callback }
 			));
 
-			if (_method.ReturnType.FullName != "System.Void")
+			if (_callback.ReturnType.FullName != "System.Void")
 			{
 				instructions.AddRange(Extensions.CecilExtensions.ParseAnonymousInstruction(
 					new { OpCodes.Pop }
