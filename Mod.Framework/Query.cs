@@ -2,6 +2,9 @@
 
 namespace Mod.Framework
 {
+	/// <summary>
+	/// A pattern based query that matches most meta data types in an assembly
+	/// </summary>
 	public class Query
 	{
 		private AssemblyExpander _expander = new AssemblyExpander();

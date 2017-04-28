@@ -4,12 +4,11 @@ using Mod.Framework.Extensions;
 namespace OTAPI.Patcher.Modules
 {
 	[Module("Making types public", "death")]
-	[AssemblyTarget("TerrariaServer, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]
 	public class MakeTypesPublic : RunnableModule
 	{
-		private Modder _modder;
+		private ModFramework _modder;
 
-		public MakeTypesPublic(Modder modder)
+		public MakeTypesPublic(ModFramework modder)
 		{
 			_modder = modder;
 		}
@@ -21,11 +20,6 @@ namespace OTAPI.Patcher.Modules
 				foreach (var type in asm.MainModule.Types)
 					type.MakePublic();
 			}
-		}
-
-		public override void Dispose()
-		{
-
 		}
 	}
 }

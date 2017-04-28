@@ -7,6 +7,11 @@ using System.Reflection;
 
 namespace Mod.Framework.Emitters
 {
+	// TODO: Test CSharpEmitter
+
+	/// <summary>
+	/// This emitter can accept C# code 
+	/// </summary>
 	public class CSharpEmitter : CSharpEmitter<Assembly>
 	{
 		public CSharpEmitter(CompilerParameters compilerParameters, params string[] csharpCode)
@@ -16,9 +21,14 @@ namespace Mod.Framework.Emitters
 		}
 	}
 
+	/// <summary>
+	/// This emitter can accept C# code 
+	/// </summary>
 	public class CSharpEmitter<TReturnObject> : IEmitter<TReturnObject>
 		where TReturnObject : class
 	{
+		private static string _classPrefix = typeof(CSharpEmitter).FullName.ToLower();
+
 		private CompilerParameters _compilerParameters;
 		private string[] _csharpCode;
 
@@ -161,7 +171,7 @@ namespace Mod.Framework.Emitters
 				this._compilerParameters = new CompilerParameters();
 			}
 
-			if(References != null)
+			if (References != null)
 			{
 				this._compilerParameters.ReferencedAssemblies.AddRange(References);
 			}
@@ -193,7 +203,7 @@ namespace Mod.Framework.Emitters
 					_csharpCode[0] = $@"
 						{usings}
 
-						public class exo_{name} {{ {_csharpCode[0]} }}
+						public class {_classPrefix}_{name} {{ {_csharpCode[0]} }}
 					";
 
 					results = provider.CompileAssemblyFromSource(_compilerParameters, _csharpCode);

@@ -4,7 +4,7 @@ namespace OTAPI.Patcher.Extensions
 {
 	public static class ModderExtensions
 	{
-		public static void SaveTo(this Modder modder, string save_directory)
+		public static void SaveTo(this ModFramework modder, string save_directory)
 		{
 			System.IO.Directory.CreateDirectory(save_directory);
 			foreach (var asm in modder.CecilAssemblies)

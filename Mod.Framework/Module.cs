@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Mod.Framework
 {
+	/// <summary>
+	/// Provides the base class for modifications
+	/// </summary>
 	public abstract class Module : IDisposable
 	{
 		public string Name { get; private set; }
@@ -34,11 +37,6 @@ namespace Mod.Framework
 			this.Order = attribute.Order;
 		}
 
-		public abstract void Dispose();
-	}
-
-	public abstract class RunnableModule : Module
-	{
-		public abstract void Run();
+		public virtual void Dispose() { }
 	}
 }

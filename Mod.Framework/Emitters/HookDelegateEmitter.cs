@@ -1,16 +1,18 @@
 ﻿using Mono.Cecil;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Mod.Framework.Emitters
 {
+	/// <summary>
+	/// This emitter will produce a hook delegate that is generated as per the <see cref="HookOptions"/>.
+	/// </summary>
 	public class HookDelegateEmitter : IEmitter<TypeDefinition>
 	{
 		private string _prefix;
 		private MethodDefinition _method;
-		private HookFlags _flags;
+		private HookOptions _flags;
 
-		public HookDelegateEmitter(string prefix, MethodDefinition method, HookFlags flags)
+		public HookDelegateEmitter(string prefix, MethodDefinition method, HookOptions flags)
 		{
 			this._prefix = prefix;
 			this._method = method;
@@ -23,7 +25,7 @@ namespace Mod.Framework.Emitters
 				.Select(x => new ParameterDefinition(x.Name, x.Attributes, x.ParameterType))
 				.ToList();
 
-			if ((_flags & HookFlags.PreReferenceParameters) != 0)
+			if ((_flags & HookOptions.ReferenceParameters) != 0)
 			{
 				foreach (var param in delegate_parameters.Where(x => x.ParameterType.IsValueType))
 				{
@@ -32,18 +34,19 @@ namespace Mod.Framework.Emitters
 			}
 
 			if (
-				(_flags & HookFlags.AlterResult) != 0
+				(_flags & HookOptions.AlterResult) != 0
 				&& _method.ReturnType != _method.DeclaringType.Module.TypeSystem.Void
 			)
 			{
 				delegate_parameters.Add(new ParameterDefinition(
 					"result",
 					ParameterAttributes.None,
-					new ByReferenceType(_method.ReturnType)
+					(_flags & HookOptions.ReferenceParameters) != 0 ?
+						new ByReferenceType(_method.ReturnType) : _method.ReturnType
 				));
 			}
 
-			TypeReference return_type = (_flags & HookFlags.Cancellable) != 0 ?
+			TypeReference return_type = (_flags & HookOptions.Cancellable) != 0 ?
 				_method.DeclaringType.Module.TypeSystem.Boolean
 				: _method.DeclaringType.Module.TypeSystem.Void;
 

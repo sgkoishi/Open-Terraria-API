@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Mod.Framework.Emitters
 {
+	/// <summary>
+	/// This emitter produces new <see cref="PropertyDefinition"/> instances that you can add to a type.
+	/// </summary>
 	public class PropertyEmitter : IEmitter<PropertyDefinition>
 	{
 		const PropertyAttributes DefaultAttributes = PropertyAttributes.None;

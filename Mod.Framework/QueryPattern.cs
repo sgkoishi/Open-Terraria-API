@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Mod.Framework
 {
+	/// <summary>
+	/// Used along side with <see cref="Query"/> to create meta data filters
+	/// </summary>
 	public class QueryPattern
 	{
 		public string AssemblyName { get; set; }
@@ -19,7 +22,7 @@ namespace Mod.Framework
 			_parameters = new List<String>();
 		}
 
-		internal bool Matches(TypeMeta meta)
+		internal bool Matches(MetaData meta)
 		{
 			if (this.AssemblyName != null)
 			{

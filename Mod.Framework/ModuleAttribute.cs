@@ -2,6 +2,9 @@
 
 namespace Mod.Framework
 {
+	/// <summary>
+	/// Allows you to configure your <see cref="Module"/> using attributes
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 	public class ModuleAttribute : Attribute
 	{

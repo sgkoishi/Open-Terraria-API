@@ -11,6 +11,9 @@ namespace Mod.Framework
 		public string FilePath { get; set; }
 	}
 
+	/// <summary>
+	/// Resolves assemblies from https://nuget.org/
+	/// </summary>
 	public class NugetAssemblyResolver : DefaultAssemblyResolver
 	{
 		protected string NugetFeedUri => "https://packages.nuget.org/api/v2";

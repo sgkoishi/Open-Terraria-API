@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Mod.Framework.Emitters
 {
+	/// <summary>
+	/// This emitter will produce a delegate that can be attached as a nested type to any module
+	/// </summary>
 	public class DelegateEmitter : IEmitter<TypeDefinition>
 	{
 		private ModuleDefinition _module;

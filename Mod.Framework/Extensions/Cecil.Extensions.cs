@@ -3,13 +3,18 @@ using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Mod.Framework.Extensions
 {
 	public static class CecilExtensions
 	{
 		#region Assembly
+		/// <summary>
+		/// Gets a type from the assembly using <see cref="TypeReference.FullName"/>
+		/// </summary>
+		/// <param name="assemblyDefinition"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
 		public static TypeDefinition Type(this AssemblyDefinition assemblyDefinition, string name)
 		{
 			return assemblyDefinition.MainModule.Types.Single(x => x.FullName == name);
@@ -100,34 +105,14 @@ namespace Mod.Framework.Extensions
 		#endregion
 
 		#region Method
-		public static Instruction AddReturn(this MethodDefinition method)
-		{
-			Instruction firstInstruction = null;
-
-			//Get the il processor instance so we can alter il
-			var il = method.Body.GetILProcessor();
-
-			//If we are working on a method with a return value
-			//we will have a value to handle.
-			if (method.ReturnType.FullName != "System.Void")
-			{
-				VariableDefinition vr1;
-				method.Body.Variables.Add(vr1 = new VariableDefinition("default_result", method.ReturnType));
-
-				//Initialise the variable
-				il.Append(firstInstruction = il.Create(OpCodes.Ldloca_S, vr1));
-				il.Emit(OpCodes.Initobj, method.ReturnType);
-				il.Emit(OpCodes.Ldloc, vr1);
-			}
-
-			//The method is now complete.
-			if (firstInstruction == null)
-				il.Append(firstInstruction = il.Create(OpCodes.Ret));
-			else il.Emit(OpCodes.Ret);
-
-			return firstInstruction;
-		}
-
+		/// <summary>
+		/// Compares to see if two methods parameters are compatible
+		/// </summary>
+		/// <param name="method"></param>
+		/// <param name="compareTo"></param>
+		/// <param name="ignoreDeclaringType"></param>
+		/// <param name="ignoreParameterNames"></param>
+		/// <returns>True when the parameter matches</returns>
 		public static bool ParametersMatch(this MethodReference method, MethodReference compareTo, bool ignoreDeclaringType = true, bool ignoreParameterNames = false)
 		{
 			if (method.Parameters.Count != compareTo.Parameters.Count)
@@ -136,9 +121,15 @@ namespace Mod.Framework.Extensions
 			for (var x = 0; x < method.Parameters.Count; x++)
 			{
 				if (method.Parameters[x].ParameterType.FullName != compareTo.Parameters[x].ParameterType.FullName
-					&& (ignoreDeclaringType && method.Parameters[x].ParameterType != method.DeclaringType)
+
+					&& (
+						ignoreDeclaringType
+						&& method.Parameters[x].ParameterType != method.DeclaringType
 					)
+				)
+				{
 					return false;
+				}
 
 				if (!ignoreParameterNames && method.Parameters[x].Name != compareTo.Parameters[x].Name)
 					return false;
@@ -147,31 +138,47 @@ namespace Mod.Framework.Extensions
 			return true;
 		}
 
-		public static bool SignatureMatches(this MethodDefinition method, MethodDefinition compareTo, bool ignoreDeclaringType = true)
+		/// <summary>
+		/// Compares two methods to check if the signatures match
+		/// </summary>
+		/// <param name="sourceMethod">Source method</param>
+		/// <param name="compareTo">The method to be compared to</param>
+		/// <param name="ignoreDeclaringType">
+		/// Ignores comparing against the declaring type of the method.
+		/// This allows can help to enforce instance callbacks are correct.
+		/// </param>
+		/// <returns>True when the signature matches</returns>
+		public static bool SignatureMatches
+		(
+			this MethodDefinition sourceMethod,
+			MethodDefinition compareTo,
+
+			bool ignoreDeclaringType = true
+		)
 		{
-			if (method.Name != compareTo.Name)
+			if (sourceMethod.Name != compareTo.Name)
 				return false;
-			if (method.ReturnType.FullName != compareTo.ReturnType.FullName)
+			if (sourceMethod.ReturnType.FullName != compareTo.ReturnType.FullName)
 				return false;
-			if (method.Overrides.Count != compareTo.Overrides.Count)
+			if (sourceMethod.Overrides.Count != compareTo.Overrides.Count)
 				return false;
-			if (method.GenericParameters.Count != compareTo.GenericParameters.Count)
+			if (sourceMethod.GenericParameters.Count != compareTo.GenericParameters.Count)
 				return false;
-			if (!method.DeclaringType.IsInterface && method.Attributes != compareTo.Attributes)
-				return false;
-
-			if (!method.ParametersMatch(compareTo, ignoreDeclaringType))
+			if (!sourceMethod.DeclaringType.IsInterface && sourceMethod.Attributes != compareTo.Attributes)
 				return false;
 
-			for (var x = 0; x < method.Overrides.Count; x++)
+			if (!sourceMethod.ParametersMatch(compareTo, ignoreDeclaringType))
+				return false;
+
+			for (var x = 0; x < sourceMethod.Overrides.Count; x++)
 			{
-				if (method.Overrides[x].Name != compareTo.Overrides[x].Name)
+				if (sourceMethod.Overrides[x].Name != compareTo.Overrides[x].Name)
 					return false;
 			}
 
-			for (var x = 0; x < method.GenericParameters.Count; x++)
+			for (var x = 0; x < sourceMethod.GenericParameters.Count; x++)
 			{
-				if (method.GenericParameters[x].Name != compareTo.GenericParameters[x].Name)
+				if (sourceMethod.GenericParameters[x].Name != compareTo.GenericParameters[x].Name)
 					return false;
 			}
 
@@ -180,16 +187,31 @@ namespace Mod.Framework.Extensions
 		#endregion
 
 		#region Type
+		/// <summary>
+		/// Gets a field from the given type
+		/// </summary>
+		/// <param name="typeDefinition">The type to search</param>
+		/// <param name="name">Name of the field</param>
 		public static FieldDefinition Field(this TypeDefinition typeDefinition, string name)
 		{
 			return typeDefinition.Fields.Single(x => x.Name == name);
 		}
 
+		/// <summary>
+		/// Gets a method from the given type
+		/// </summary>
+		/// <param name="type">The type to search</param>
+		/// <param name="name">Name of the method</param>
 		public static MethodDefinition Method(this TypeDefinition type, string name)
 		{
 			return type.Methods.Single(x => x.Name == name);
 		}
 
+		/// <summary>
+		/// Enumerates over each method in the given type
+		/// </summary>
+		/// <param name="type">The type that contains the methods</param>
+		/// <param name="callback">The callback to process methods with</param>
 		public static void ForEachMethod(this TypeDefinition type, Action<MethodDefinition> callback)
 		{
 			if (type.HasMethods)
@@ -199,24 +221,6 @@ namespace Mod.Framework.Extensions
 					callback.Invoke(method);
 				}
 			}
-		}
-
-		public static Type AsType(this TypeReference type)
-		{
-			var typeName = new StringBuilder();
-
-			typeName.Append(type.Name);
-
-			TypeReference node = type.DeclaringType;
-			while (node != null)
-			{
-				typeName.Insert(0, node.Name + '\\');
-				node = type.DeclaringType;
-			}
-
-			typeName.Insert(0, type.Namespace + '.');
-
-			return System.Type.GetType(typeName.ToString());
 		}
 
 		/// <summary>
@@ -302,6 +306,10 @@ namespace Mod.Framework.Extensions
 				nt.MakePublic();
 		}
 
+		/// <summary>
+		/// Transforms all of the instance methods into virtual (overridable) methods
+		/// </summary>
+		/// <param name="type">The type to be made virtual</param>
 		public static void MakeVirtual(this TypeDefinition type)
 		{
 			var methods = type.Methods.Where(m => !m.IsConstructor && !m.IsStatic).ToArray();
@@ -323,6 +331,13 @@ namespace Mod.Framework.Extensions
 			});
 		}
 
+		/// <summary>
+		/// Compares two types to check if the type's signatures match. 
+		/// This can be useful when replacing types/interfaces
+		/// </summary>
+		/// <param name="type">Source type</param>
+		/// <param name="compareTo">The type to compare to</param>
+		/// <returns>True when the signatures match</returns>
 		public static bool SignatureMatches(this TypeDefinition type, TypeDefinition compareTo)
 		{
 			var typeInstanceMethods = type.Methods.Where(m => !m.IsStatic && !m.IsGetter && !m.IsSetter);
@@ -345,6 +360,11 @@ namespace Mod.Framework.Extensions
 			return true;
 		}
 
+		/// <summary>
+		/// Enumerates all nested types in the given type
+		/// </summary>
+		/// <param name="parent">Type to find nested types in</param>
+		/// <param name="callback">The callback to process nested types</param>
 		public static void ForEachNestedType(this TypeDefinition parent, Action<TypeDefinition> callback)
 		{
 			foreach (var type in parent.NestedTypes)
@@ -368,6 +388,11 @@ namespace Mod.Framework.Extensions
 			}
 		}
 
+		/// <summary>
+		/// Parses anonymously typed instructions into Instruction instances that are compatible with Mono.Cecil
+		/// </summary>
+		/// <param name="anonymous">Parameter list of instructions, or array of instructions</param>
+		/// <returns>The parsed instructions</returns>
 		public static IEnumerable<Instruction> ParseAnonymousInstruction(params object[] anonymous)
 		{
 			foreach (var anon in anonymous)
@@ -395,19 +420,29 @@ namespace Mod.Framework.Extensions
 		}
 
 		/// <summary>
+		/// Adds a list of anonymously typed instructions into the current list
+		/// </summary>
+		/// <param name="list">The list to add parsed instructions to</param>
+		/// <param name="anonymous">The list of anonymous types</param>
+		public static void Add(this List<Instruction> list, params object[] anonymous)
+		{
+			list.AddRange(ParseAnonymousInstruction(anonymous));
+		}
+
+		/// <summary>
 		/// Converts a anonymous type into an Instruction
 		/// </summary>
-		/// <param name="anon"></param>
+		/// <param name="anonymous">The anonymous type to be parsed</param>
 		/// <returns></returns>
-		private static Instruction InternalAnonymousToInstruction(object anon)
+		private static Instruction InternalAnonymousToInstruction(object anonymous)
 		{
-			var reference = anon as InstructionReference;
+			var reference = anonymous as InstructionReference;
 			if (reference != null)
 			{
 				return reference.Reference;
 			}
 
-			var annonType = anon.GetType();
+			var annonType = anonymous.GetType();
 			var properties = annonType.GetProperties();
 
 			//An instruction consists of only 1 opcode, or 1 opcode and 1 operation
@@ -420,7 +455,7 @@ namespace Mod.Framework.Extensions
 				throw new NotSupportedException("Anonymous instruction expected 1 opcode property");
 
 			//Get the opcode value
-			var opcode = (OpCode)propOpcode.GetMethod.Invoke(anon, null);
+			var opcode = (OpCode)propOpcode.GetMethod.Invoke(anonymous, null);
 
 			//Now determine if we need an operand or not
 			Instruction ins = null;
@@ -430,7 +465,7 @@ namespace Mod.Framework.Extensions
 				//must be the operand.
 				var propOperand = properties.Where(x => x != propOpcode).Single();
 
-				var operand = propOperand.GetMethod.Invoke(anon, null);
+				var operand = propOperand.GetMethod.Invoke(anonymous, null);
 				var operandType = propOperand.PropertyType;
 				reference = operand as InstructionReference;
 				if (reference != null)
@@ -454,7 +489,7 @@ namespace Mod.Framework.Extensions
 
 				//Get the operand value and pass it to the Instruction.Create method to create
 				//the instruction.
-				ins = (Instruction)instructionMethod.Method.Invoke(anon, new[] { opcode, operand });
+				ins = (Instruction)instructionMethod.Method.Invoke(anonymous, new[] { opcode, operand });
 			}
 			else
 			{
@@ -464,7 +499,7 @@ namespace Mod.Framework.Extensions
 
 			return ins;
 		}
-		
+
 		/// <summary>
 		/// Inserts a list of anonymous instructions after the target instruction
 		/// </summary>
@@ -501,6 +536,12 @@ namespace Mod.Framework.Extensions
 		#endregion
 
 		#region Instructions
+		/// <summary>
+		/// Finds the first instruction after the current instruction that matches the predicate
+		/// </summary>
+		/// <param name="initial">The current instruction</param>
+		/// <param name="predicate">Predicate</param>
+		/// <returns>The matching instruction</returns>
 		public static Instruction Previous(this Instruction initial, Func<Instruction, Boolean> predicate)
 		{
 			while (initial.Previous != null)
@@ -512,6 +553,12 @@ namespace Mod.Framework.Extensions
 			return null;
 		}
 
+		/// <summary>
+		/// Finds the first instruction before the current instruction that matches the predicate
+		/// </summary>
+		/// <param name="initial">The current instruction</param>
+		/// <param name="predicate">Predicate</param>
+		/// <returns>The matching instruction</returns>
 		public static Instruction Next(this Instruction initial, Func<Instruction, Boolean> predicate)
 		{
 			while (initial.Next != null)
@@ -521,31 +568,6 @@ namespace Mod.Framework.Extensions
 			}
 
 			return null;
-		}
-
-		public static Instruction Previous(this Instruction initial, int count)
-		{
-			while (count > 0)
-			{
-				initial = initial.Previous;
-				count--;
-			}
-
-			return initial;
-		}
-
-		public static List<Instruction> Next(this Instruction initial, int count = -1)
-		{
-			var instructions = new List<Instruction>();
-			while (initial.Previous != null && (count == -1 || count > 0))
-			{
-				initial = initial.Previous;
-				count--;
-
-				instructions.Add(initial);
-			}
-
-			return instructions;
 		}
 
 		/// <summary>

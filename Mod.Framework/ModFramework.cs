@@ -9,7 +9,11 @@ using System.Reflection;
 
 namespace Mod.Framework
 {
-	public class Modder : IDisposable
+	/// <summary>
+	/// The bootstrapper for the Mod.Framework library.
+	/// It will prepare Ninject and the registered modules
+	/// </summary>
+	public class ModFramework : IDisposable
 	{
 		private StandardKernel _kernel;
 		private NugetAssemblyResolver _resolver;
@@ -20,7 +24,7 @@ namespace Mod.Framework
 
 		public string DefaultModuleGlob = @"../../../Mod.Framework.**/bin/Debug/Mod.Framework.**.dll";
 
-		public Modder(params Assembly[] module_assemblies)
+		public ModFramework(params Assembly[] module_assemblies)
 		{
 			this.Assemblies.Add(Assembly.GetExecutingAssembly());
 			this.Assemblies.AddRange(module_assemblies);
@@ -33,7 +37,7 @@ namespace Mod.Framework
 
 			_kernel = new StandardKernel();
 
-			_kernel.Bind<Modder>().ToConstant(this);
+			_kernel.Bind<ModFramework>().ToConstant(this);
 
 			LoadExternalModules();
 
@@ -46,7 +50,7 @@ namespace Mod.Framework
 
 		private void LoadExternalModules()
 		{
-			this.LoadFileModules(this.DefaultModuleGlob);
+			this.RegisterAssemblyFiles(this.DefaultModuleGlob);
 		}
 
 		private void UpdateCecilAssemblies()
@@ -83,7 +87,7 @@ namespace Mod.Framework
 			return new_path;
 		}
 
-		public void LoadFileModules(params string[] globs)
+		public void RegisterAssemblyFiles(params string[] globs)
 		{
 			foreach (var glob in globs)
 			{

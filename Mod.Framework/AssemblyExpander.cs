@@ -6,19 +6,25 @@ using System.Text;
 
 namespace Mod.Framework
 {
+	/// <summary>
+	/// This is used to build the <see cref="Query"/> filters.
+	/// It allows input of most types of meta data from Mono.Cecil.
+	/// The expander will recursively scan the meta data into a flat array in memory, which makes it easier 
+	/// for <see cref="QueryResult"/> to make use of Linq
+	/// </summary>
 	public class AssemblyExpander
 	{
 		private List<object> _context;
-		private List<TypeMeta> _results = new List<TypeMeta>();
+		private List<MetaData> _results = new List<MetaData>();
 
-		private static Dictionary<string, List<TypeMeta>> _assembly_cache = new Dictionary<string, List<TypeMeta>>();
+		private static Dictionary<string, List<MetaData>> _assembly_cache = new Dictionary<string, List<MetaData>>();
 
 		public AssemblyExpander()
 		{
 
 		}
 
-		public IEnumerable<TypeMeta> Results
+		public IEnumerable<MetaData> Results
 		{
 			get { return _results; }
 		}
@@ -50,7 +56,7 @@ namespace Mod.Framework
 
 		public void Expand(ParameterDefinition parameter, bool add = true)
 		{
-			if (add) this._results.Add(new TypeMeta()
+			if (add) this._results.Add(new MetaData()
 			{
 				Instance = parameter,
 				AssemblyName = parameter.ParameterType.Module.Assembly.Name.Name,
@@ -60,7 +66,7 @@ namespace Mod.Framework
 
 		public void Expand(PropertyDefinition property, bool add = true)
 		{
-			if (add) this._results.Add(new TypeMeta()
+			if (add) this._results.Add(new MetaData()
 			{
 				Instance = property,
 				AssemblyName = property.PropertyType.Module.Assembly.Name.Name,
@@ -89,7 +95,7 @@ namespace Mod.Framework
 
 		public void Expand(MethodDefinition method, bool add = true)
 		{
-			if (add) this._results.Add(new TypeMeta()
+			if (add) this._results.Add(new MetaData()
 			{
 				Instance = method,
 				AssemblyName = method.DeclaringType.Module.Assembly.Name.Name,
@@ -111,7 +117,7 @@ namespace Mod.Framework
 		}
 		public void Expand(TypeDefinition type, bool add = true)
 		{
-			if (add) this._results.Add(new TypeMeta()
+			if (add) this._results.Add(new MetaData()
 			{
 				Instance = type,
 				AssemblyName = type.Module.Assembly.Name.Name,
@@ -134,7 +140,7 @@ namespace Mod.Framework
 
 		public void Expand(ModuleDefinition module, bool add = true)
 		{
-			if (add) this._results.Add(new TypeMeta()
+			if (add) this._results.Add(new MetaData()
 			{
 				Instance = module,
 				AssemblyName = module.Assembly.Name.Name,
@@ -149,12 +155,12 @@ namespace Mod.Framework
 
 		public void Expand(AssemblyDefinition assembly, bool add = true)
 		{
-			List<TypeMeta> meta = null;
+			List<MetaData> meta = null;
 			if (!_assembly_cache.TryGetValue(assembly.FullName, out meta) || meta == null)
 			{
 				Console.Write($"Expanding assembly {assembly.FullName}...");
 
-				if (add) this._results.Add(new TypeMeta()
+				if (add) this._results.Add(new MetaData()
 				{
 					Instance = assembly,
 					AssemblyName = assembly.Name.Name,

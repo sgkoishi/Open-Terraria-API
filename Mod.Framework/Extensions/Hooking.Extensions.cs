@@ -10,8 +10,17 @@ namespace Mod.Framework.Extensions
 {
 	public static class HookingExtensions
 	{
+		const String DefaultHooksTypeName = "ModHooks";
+		const String DefaultHandlersTypeName = "ModHandlers";
+
 		#region Hooking
-		public static MergableMethod GenerateBeginHook(this MethodDefinition method, HookFlags flags = HookFlags.Default)
+		/// <summary>
+		/// Generates a hook that is called before any native code
+		/// </summary>
+		/// <param name="method">Method to generate the hook in</param>
+		/// <param name="options">Configurable hook options</param>
+		/// <returns>A <see cref="MergableMethod"/> instance</returns>
+		public static MergableMethod GenerateBeginHook(this MethodDefinition method, HookOptions options = HookOptions.Default)
 		{
 			// emit call at offset 0
 
@@ -20,7 +29,7 @@ namespace Mod.Framework.Extensions
 			var hooks_delegates_type = method.DeclaringType.GetHooksDelegateType();
 
 			// generate the hook handler delegate
-			var hook_delegate_emitter = new HookDelegateEmitter("OnPre", method, flags);
+			var hook_delegate_emitter = new HookDelegateEmitter("OnPre", method, options);
 			var hook_handler = hook_delegate_emitter.Emit();
 			hooks_delegates_type.NestedTypes.Add(hook_handler);
 
@@ -30,8 +39,8 @@ namespace Mod.Framework.Extensions
 
 			// generate the call to the delegate
 			var hook_emitter = new HookEmitter(hook_field, method,
-				(flags & HookFlags.Cancellable) != 0,
-				(flags & HookFlags.PreReferenceParameters) != 0
+				(options & HookOptions.Cancellable) != 0,
+				(options & HookOptions.ReferenceParameters) != 0
 			);
 			var result = hook_emitter.Emit();
 			//instructions.MergeInto(method, 0);
@@ -51,7 +60,13 @@ namespace Mod.Framework.Extensions
 			return result;
 		}
 
-		public static MergableMethod GenerateEndHook(this MethodDefinition method, HookFlags flags = HookFlags.Default)
+		/// <summary>
+		/// Generates a hook that is called after native code
+		/// </summary>
+		/// <param name="method">Method to generate the hook in</param>
+		/// <param name="options">Configurable hook options</param>
+		/// <returns>A <see cref="MergableMethod"/> instance</returns>
+		public static MergableMethod GenerateEndHook(this MethodDefinition method, HookOptions options = HookOptions.Default)
 		{
 			// emit call at each ret instruction
 
@@ -60,9 +75,9 @@ namespace Mod.Framework.Extensions
 			var hooks_delegates_type = method.DeclaringType.GetHooksDelegateType();
 
 			// generate the hook handler delegate
-			var hook_delegate_emitter = new HookDelegateEmitter("OnPost", method, flags & ~(
-				HookFlags.PreReferenceParameters |
-				HookFlags.Cancellable
+			var hook_delegate_emitter = new HookDelegateEmitter("OnPost", method, options & ~(
+				HookOptions.ReferenceParameters |
+				HookOptions.Cancellable
 			));
 			var hook_handler = hook_delegate_emitter.Emit();
 			hooks_delegates_type.NestedTypes.Add(hook_handler);
@@ -81,7 +96,13 @@ namespace Mod.Framework.Extensions
 			return result;
 		}
 
-		public static QueryResult Hook(this QueryResult results, HookFlags flags = HookFlags.Default)
+		/// <summary>
+		/// Adds configurable hooks into each method of the query
+		/// </summary>
+		/// <param name="results">Methods to be hooked</param>
+		/// <param name="options">Hook options</param>
+		/// <returns>The existing <see cref="QueryResult"/> instance</returns>
+		public static QueryResult Hook(this QueryResult results, HookOptions options = HookOptions.Default)
 		{
 			var context = results
 				.Select(x => x.Instance as MethodDefinition)
@@ -116,12 +137,12 @@ namespace Mod.Framework.Extensions
 				}
 				call.MergeInto(new_method, 0);
 
-				if ((flags & HookFlags.Pre) != 0)
+				if ((options & HookOptions.Pre) != 0)
 				{
-					var hook = new_method.GenerateBeginHook(flags);
+					var hook = new_method.GenerateBeginHook(options);
 
-					if ((flags & HookFlags.Cancellable) != 0
-						&& (flags & HookFlags.AlterResult) == 0
+					if ((options & HookOptions.Cancellable) != 0
+						&& (options & HookOptions.AlterResult) == 0
 						&& method.ReturnType.FullName != "System.Void")
 					{
 						// TODO: this functionality will be desired - idea: just generate the "default(T)"
@@ -132,9 +153,9 @@ namespace Mod.Framework.Extensions
 					hook.MergeInto(new_method, 0);
 				}
 
-				if ((flags & HookFlags.Post) != 0)
+				if ((options & HookOptions.Post) != 0)
 				{
-					var hook = new_method.GenerateEndHook(flags);
+					var hook = new_method.GenerateEndHook(options);
 
 					//var last_ret = new_method.Body.Instructions.Last(x => x.OpCode == OpCodes.Ret);
 					//last_ret.ReplaceTransfer(hook.Instructions.First(), new_method);
@@ -153,34 +174,62 @@ namespace Mod.Framework.Extensions
 		#endregion
 
 		#region Helpers
-		public static TypeDefinition AddOrGetNestedType(this TypeDefinition type, string name, TypeAttributes attributes)
+		/// <summary>
+		/// Adds or gets an existing nested type
+		/// </summary>
+		/// <param name="parentType">The parent type</param>
+		/// <param name="nestedTypeName">The name of the nested type</param>
+		/// <param name="attributes">Attributes for the nested type</param>
+		/// <returns></returns>
+		public static TypeDefinition AddOrGetNestedType
+		(
+			this TypeDefinition parentType,
+			string nestedTypeName,
+			TypeAttributes attributes
+		)
 		{
-			var nested_type = type.NestedTypes.SingleOrDefault(x => x.Name == name);
+			var nested_type = parentType.NestedTypes.SingleOrDefault(x => x.Name == nestedTypeName);
 			if (nested_type == null)
 			{
-				nested_type = new TypeDefinition(String.Empty, name, attributes);
-				nested_type.BaseType = type.Module.TypeSystem.Object;
-				type.NestedTypes.Add(nested_type);
+				nested_type = new TypeDefinition(String.Empty, nestedTypeName, attributes);
+				nested_type.BaseType = parentType.Module.TypeSystem.Object;
+				parentType.NestedTypes.Add(nested_type);
 			}
 			return nested_type;
 		}
 
+		/// <summary>
+		/// Adds the standard hooks type into the given type
+		/// </summary>
+		/// <param name="type">Parent type</param>
+		/// <returns>The requested hook type</returns>
 		public static TypeDefinition GetHooksType(this TypeDefinition type)
 		{
-			return type.AddOrGetNestedType("ModHooks",
+			return type.AddOrGetNestedType(DefaultHooksTypeName,
 				TypeAttributes.NestedPublic | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit
 			);
 		}
 
+		/// <summary>
+		/// Adds the standard handlers type into the given type
+		/// </summary>
+		/// <param name="type">Parent type</param>
+		/// <returns>The requested handler type</returns>
 		public static TypeDefinition GetHooksDelegateType(this TypeDefinition type)
 		{
 			var hooks_type = GetHooksType(type);
-			return hooks_type.AddOrGetNestedType("ModHandlers",
+			return hooks_type.AddOrGetNestedType(DefaultHandlersTypeName,
 				TypeAttributes.NestedPublic | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit
 			);
 		}
 
-		public static MethodDefinition Clone(this MethodDefinition method, bool add_return = false)
+		/// <summary>
+		/// Clones the signatures of a method into a new empty method.
+		/// This is used to replace native methods.
+		/// </summary>
+		/// <param name="method">The method to clone</param>
+		/// <returns>The new cloned method</returns>
+		public static MethodDefinition Clone(this MethodDefinition method)
 		{
 			var clone = new MethodDefinition(method.Name, method.Attributes, method.ReturnType);
 
@@ -189,15 +238,18 @@ namespace Mod.Framework.Extensions
 				clone.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes, param.ParameterType));
 			}
 
-			if (add_return)
-				clone.AddReturn();
-
 			return clone;
 		}
 
-		public static IEnumerable<MethodDefinition> Clone(this IEnumerable<MethodDefinition> results)
+		/// <summary>
+		/// Clones the signatures of a method into a new empty method.
+		/// This is used to replace native methods.
+		/// </summary>
+		/// <param name="methods">The methods to clone</param>
+		/// <returns>The new cloned methods</returns>
+		public static IEnumerable<MethodDefinition> Clone(this IEnumerable<MethodDefinition> methods)
 		{
-			foreach (var method in results)
+			foreach (var method in methods)
 			{
 				yield return method.Clone();
 			}

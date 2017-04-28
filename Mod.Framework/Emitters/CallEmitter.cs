@@ -5,34 +5,33 @@ using System.Collections.Generic;
 namespace Mod.Framework.Emitters
 {
 	/// <summary>
-	/// This emitter will 
+	/// This emitter will output IL for calling a method.
 	/// </summary>
 	public class CallEmitter : IEmitter<MergableMethod>
 	{
-		private MethodDefinition _callback;
+		private MethodDefinition _method;
 		private Instruction _insert_before;
 		public bool _reference_args;
 
-		public CallEmitter(MethodDefinition callback, Instruction insert_before)
+		public CallEmitter(MethodDefinition method, Instruction insert_before)
 		{
-			this._callback = callback;
+			this._method = method;
 			this._insert_before = insert_before;
 		}
 
 		public MergableMethod Emit()
 		{
 			var instructions = new List<Instruction>();
-			//var processor = _method.Body.GetILProcessor();
 
 			// if the callback is an instance method then add in the instance (this)
-			if (!_callback.IsStatic)
+			if (!_method.IsStatic)
 			{
 				instructions.AddRange(Extensions.CecilExtensions.ParseAnonymousInstruction(
 					new { OpCodes.Ldarg_0 }
 				));
 			}
 
-			foreach (var parameter in _callback.Parameters)
+			foreach (var parameter in _method.Parameters)
 			{
 				var opcode = parameter.ParameterType.IsByReference ? OpCodes.Ldarga : OpCodes.Ldarg;
 
@@ -42,10 +41,10 @@ namespace Mod.Framework.Emitters
 			}
 
 			instructions.AddRange(Extensions.CecilExtensions.ParseAnonymousInstruction(
-				new { OpCodes.Call, _callback }
+				new { OpCodes.Call, _method }
 			));
 
-			if (_callback.ReturnType.FullName != "System.Void")
+			if (_method.ReturnType.FullName != "System.Void")
 			{
 				instructions.AddRange(Extensions.CecilExtensions.ParseAnonymousInstruction(
 					new { OpCodes.Pop }

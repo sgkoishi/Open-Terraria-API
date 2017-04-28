@@ -2,7 +2,10 @@
 
 namespace Mod.Framework
 {
-	public class QueryResult : List<TypeMeta>
+	/// <summary>
+	/// Holds meta data results from a <see cref="Query"/> instance
+	/// </summary>
+	public class QueryResult : List<MetaData>
 	{
 		public Query Query { get; internal set; }
 	}

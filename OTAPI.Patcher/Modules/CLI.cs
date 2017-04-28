@@ -9,18 +9,20 @@ using System.Reflection;
 namespace OTAPI.Patcher.Modules
 {
 	[Module("Command line arguments", "death")]
+	[AssemblyTarget("TerrariaServer, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]
+	[AssemblyTarget("Terraria, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]
 	public class CLI : RunnableModule
 	{
-		private Modder _modder;
+		private ModFramework _modder;
 
-		public CLI(Modder modder)
+		public CLI(ModFramework modder)
 		{
 			_modder = modder;
 		}
 
-		private HookFlags ParseFromPattern(ref string pattern)
+		private HookOptions ParseFromPattern(ref string pattern)
 		{
-			var flags = HookFlags.None;
+			var flags = HookOptions.None;
 			var segments = pattern.Split('$');
 
 			if (segments.Length == 2)
@@ -34,19 +36,19 @@ namespace OTAPI.Patcher.Modules
 					switch(flag)
 					{
 						case 'b': // begin hook
-							flags |= HookFlags.Pre;
+							flags |= HookOptions.Pre;
 							break;
 						case 'e': // end hook
-							flags |= HookFlags.Post;
+							flags |= HookOptions.Post;
 							break;
 						case 'r': // reference parameters
-							flags |= HookFlags.PreReferenceParameters;
+							flags |= HookOptions.ReferenceParameters;
 							break;
 						case 'c': // begin hook can cancel
-							flags |= HookFlags.Cancellable;
+							flags |= HookOptions.Cancellable;
 							break;
 						case 'a': // begin hook can alter non-void method return value
-							flags |= HookFlags.AlterResult;
+							flags |= HookOptions.AlterResult;
 							break;
 						default:
 							throw new Exception($"Assembly Modification Pattern Flag is not valid: `{flag}`");
@@ -75,7 +77,7 @@ namespace OTAPI.Patcher.Modules
 				args = new[]
 				{
 					//@"-m=[TerrariaServer]Terraria.*,[TerrariaServer]ReLogic.*/rbe",
-					@"-m=Terraria.Chest.Find*$ber",
+					@"-m=Terraria.Chest.Find*$berca",
 					@"-m=Terraria.Main.Initialize()$bec",
 					@"-a=../../../TerrariaServer.exe",
 				};
@@ -95,7 +97,7 @@ namespace OTAPI.Patcher.Modules
 				return;
 			}
 
-			_modder.LoadFileModules(inputs.ToArray());
+			_modder.RegisterAssemblyFiles(inputs.ToArray());
 
 			foreach (var pattern in modifications)
 			{
@@ -150,11 +152,6 @@ namespace OTAPI.Patcher.Modules
 			//	.Run()
 			//	.Hook(HookFlags.Pre | HookFlags.Post | HookFlags.Cancellable)
 			//;
-		}
-
-		public override void Dispose()
-		{
-
 		}
 	}
 }
