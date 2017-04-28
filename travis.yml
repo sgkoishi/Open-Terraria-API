@@ -1,0 +1,9 @@
+language: csharp
+mono:
+  - beta
+solution: OTAPI.Server.v3.sln
+install:
+  - mozroots --import --sync
+  - nuget restore OTAPI.Server.v3.sln
+script:
+  - xbuild /p:Configuration=Debug OTAPI.Server.v3.sln
