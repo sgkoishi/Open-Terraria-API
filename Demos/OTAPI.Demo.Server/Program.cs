@@ -9,15 +9,23 @@ namespace OTAPI.v3.Demo.Server
 		static void Main(string[] args)
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += ResolveTerrariaReferences;
+			AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
 
 			#region Auto generated hooks
-			Terraria.Chest.ModHooks.PreFindChest = (ref int x, ref int y) =>
+			ModFramework.ModHooks.Chest.PreFindChest = (ref int x, ref int y, ref int result) =>
 			{
-				Console.WriteLine(nameof(Terraria.Chest.ModHooks.PreFindChest));
+				Console.WriteLine($"{nameof(ModFramework.ModHooks.Chest.PreFindChest)} X={x},Y={y},r={result}");
+				return true;
 			};
-			Terraria.Main.ModHooks.PreInitialize = () =>
+			ModFramework.ModHooks.Main.PreInitialize = () =>
 			{
-				Console.WriteLine(nameof(Terraria.Main.ModHooks.PreInitialize));
+				Console.WriteLine(nameof(ModFramework.ModHooks.Main.PreInitialize));
+				return true;
+			};
+			ModFramework.ModHooks.MessageBuffer.PreGetData = (ref int start, ref int length, out int messageType) =>
+			{
+				messageType = 0;
+				Console.WriteLine(nameof(ModFramework.ModHooks.MessageBuffer.PreGetData));
 				return true;
 			};
 			#endregion
@@ -36,6 +44,11 @@ namespace OTAPI.v3.Demo.Server
 			{
 				Console.WriteLine(ex);
 			}
+		}
+
+		private static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
+		{
+
 		}
 
 		private static System.Reflection.Assembly ResolveTerrariaReferences(object sender, ResolveEventArgs args)

@@ -16,5 +16,6 @@ bin/
 obj/
 
 TerrariaServer.exe
+ReLogic.dll
 
 *.lock.json

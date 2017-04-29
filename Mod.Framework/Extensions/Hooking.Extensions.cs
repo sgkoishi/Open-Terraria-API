@@ -10,8 +10,11 @@ namespace Mod.Framework.Extensions
 {
 	public static class HookingExtensions
 	{
+		const String DefaultTypeNamespace = "ModFramework";
 		const String DefaultHooksTypeName = "ModHooks";
 		const String DefaultHandlersTypeName = "ModHandlers";
+		const TypeAttributes DefaultPublicTypeAttributes = TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit;
+		const TypeAttributes DefaultNestedTypeAttributes = TypeAttributes.NestedPublic | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit;
 
 		#region Hooking
 		/// <summary>
@@ -20,7 +23,13 @@ namespace Mod.Framework.Extensions
 		/// <param name="method">Method to generate the hook in</param>
 		/// <param name="options">Configurable hook options</param>
 		/// <returns>A <see cref="MergableMethod"/> instance</returns>
-		public static MergableMethod GenerateBeginHook(this MethodDefinition method, HookOptions options = HookOptions.Default)
+		public static MergableMethod GenerateBeginHook
+		(
+			this MethodDefinition method,
+
+			HookOptions options = HookOptions.Default,
+			VariableDefinition result_variable = null
+		)
 		{
 			// emit call at offset 0
 
@@ -40,7 +49,8 @@ namespace Mod.Framework.Extensions
 			// generate the call to the delegate
 			var hook_emitter = new HookEmitter(hook_field, method,
 				(options & HookOptions.Cancellable) != 0,
-				(options & HookOptions.ReferenceParameters) != 0
+				(options & HookOptions.ReferenceParameters) != 0,
+				result_variable
 			);
 			var result = hook_emitter.Emit();
 			//instructions.MergeInto(method, 0);
@@ -66,7 +76,13 @@ namespace Mod.Framework.Extensions
 		/// <param name="method">Method to generate the hook in</param>
 		/// <param name="options">Configurable hook options</param>
 		/// <returns>A <see cref="MergableMethod"/> instance</returns>
-		public static MergableMethod GenerateEndHook(this MethodDefinition method, HookOptions options = HookOptions.Default)
+		public static MergableMethod GenerateEndHook
+		(
+			this MethodDefinition method,
+
+			HookOptions options = HookOptions.Default,
+			VariableDefinition result_variable = null
+		)
 		{
 			// emit call at each ret instruction
 
@@ -87,7 +103,7 @@ namespace Mod.Framework.Extensions
 			hooks_type.Fields.Add(hook_field);
 
 			// generate the call to the delegate
-			var hook_emitter = new HookEmitter(hook_field, method, false, false);
+			var hook_emitter = new HookEmitter(hook_field, method, false, false, result_variable);
 			var result = hook_emitter.Emit();
 			//instructions.MergeInto(method, 0);
 
@@ -116,6 +132,7 @@ namespace Mod.Framework.Extensions
 				method.Name += "Direct";
 				method.DeclaringType.Methods.Add(new_method);
 				method.Attributes &= ~MethodAttributes.Virtual;
+				method.ReplaceWith(new_method);
 
 				var processor = new_method.Body.GetILProcessor();
 				var ins_return = Instruction.Create(OpCodes.Ret);
@@ -139,7 +156,7 @@ namespace Mod.Framework.Extensions
 
 				if ((options & HookOptions.Pre) != 0)
 				{
-					var hook = new_method.GenerateBeginHook(options);
+					var hook = new_method.GenerateBeginHook(options, return_variable);
 
 					if ((options & HookOptions.Cancellable) != 0
 						&& (options & HookOptions.AlterResult) == 0
@@ -155,7 +172,7 @@ namespace Mod.Framework.Extensions
 
 				if ((options & HookOptions.Post) != 0)
 				{
-					var hook = new_method.GenerateEndHook(options);
+					var hook = new_method.GenerateEndHook(options, return_variable);
 
 					//var last_ret = new_method.Body.Instructions.Last(x => x.OpCode == OpCodes.Ret);
 					//last_ret.ReplaceTransfer(hook.Instructions.First(), new_method);
@@ -165,7 +182,9 @@ namespace Mod.Framework.Extensions
 
 				if (return_variable != null)
 				{
-					processor.InsertBefore(ins_return, Instruction.Create(OpCodes.Ldloc, return_variable));
+					var ins_return_variable = Instruction.Create(OpCodes.Ldloc, return_variable);
+					processor.InsertBefore(ins_return, ins_return_variable);
+					ins_return.ReplaceTransfer(ins_return_variable, new_method);
 				}
 			}
 
@@ -197,6 +216,30 @@ namespace Mod.Framework.Extensions
 			}
 			return nested_type;
 		}
+		/// <summary>
+		/// Adds or gets an existing nested type
+		/// </summary>
+		/// <param name="parentType">The parent type</param>
+		/// <param name="typeName">The name of the type</param>
+		/// <param name="attributes">Attributes for the type</param>
+		/// <returns></returns>
+		public static TypeDefinition AddOrGetType
+		(
+			this AssemblyDefinition assembly,
+			string typeName,
+			TypeAttributes attributes,
+			string @namespace = ""
+		)
+		{
+			var nested_type = assembly.MainModule.Types.SingleOrDefault(x => x.Name == typeName);
+			if (nested_type == null)
+			{
+				nested_type = new TypeDefinition(@namespace, typeName, attributes);
+				nested_type.BaseType = assembly.MainModule.TypeSystem.Object;
+				assembly.MainModule.Types.Add(nested_type);
+			}
+			return nested_type;
+		}
 
 		/// <summary>
 		/// Adds the standard hooks type into the given type
@@ -205,9 +248,9 @@ namespace Mod.Framework.Extensions
 		/// <returns>The requested hook type</returns>
 		public static TypeDefinition GetHooksType(this TypeDefinition type)
 		{
-			return type.AddOrGetNestedType(DefaultHooksTypeName,
-				TypeAttributes.NestedPublic | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit
-			);
+			var hooks_type = AddOrGetType(type.Module.Assembly, DefaultHooksTypeName, DefaultPublicTypeAttributes, DefaultTypeNamespace);
+
+			return hooks_type.AddOrGetNestedType(type.Name, DefaultNestedTypeAttributes);
 		}
 
 		/// <summary>
@@ -218,9 +261,7 @@ namespace Mod.Framework.Extensions
 		public static TypeDefinition GetHooksDelegateType(this TypeDefinition type)
 		{
 			var hooks_type = GetHooksType(type);
-			return hooks_type.AddOrGetNestedType(DefaultHandlersTypeName,
-				TypeAttributes.NestedPublic | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit
-			);
+			return hooks_type.AddOrGetNestedType(DefaultHandlersTypeName, DefaultNestedTypeAttributes);
 		}
 
 		/// <summary>

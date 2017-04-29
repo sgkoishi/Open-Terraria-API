@@ -16,15 +16,25 @@ namespace Mod.Framework.Emitters
 		private MethodDefinition _method;
 		private bool _is_cancellable;
 		private bool _is_by_reference;
+		private VariableDefinition _result_variable;
 
 		private List<VariableDefinition> _variables = new List<VariableDefinition>();
 
-		public HookEmitter(FieldDefinition hook_field, MethodDefinition method, bool is_cancellable, bool is_by_reference)
+		public HookEmitter
+		(
+			FieldDefinition hook_field,
+			MethodDefinition method,
+			bool is_cancellable,
+			bool is_by_reference,
+
+			VariableDefinition result_variable = null
+		)
 		{
 			this._hook_field = hook_field;
 			this._method = method;
 			this._is_cancellable = is_cancellable;
 			this._is_by_reference = is_by_reference;
+			this._result_variable = result_variable;
 		}
 
 		List<Instruction> EmitCall()
@@ -71,6 +81,22 @@ namespace Mod.Framework.Emitters
 										OpCode = _is_by_reference && x.ParameterType.IsValueType ? OpCodes.Ldarga : OpCodes.Ldarg,
 										Operand = x
 									}),
+								
+								// adds the return result
+								new Func<IEnumerable<object>>(() =>
+								{
+									if(_result_variable !=null)
+									{
+										return new [] {
+											new {
+												OpCode = _is_by_reference ? OpCodes.Ldloca : OpCodes.Ldloc,
+												_result_variable
+											}
+										};
+									}
+									return Enumerable.Empty<object >();
+								}).Invoke(),
+
 								new { OpCodes.Callvirt, invoke_method }
 							};
 						}
@@ -88,7 +114,11 @@ namespace Mod.Framework.Emitters
 					}).Invoke(),
 
 					store_result = store_result.Create(OpCodes.Stloc, local_field_instance),
-					new { OpCodes.Ldloc, local_field_instance }
+					new
+					{
+						OpCodes.Ldloc,
+						local_field_instance
+					}
 				).ToList();
 			}
 			else
@@ -111,15 +141,32 @@ namespace Mod.Framework.Emitters
 							call_invoke = call_invoke.Create(
 								_is_by_reference && first.ParameterType.IsValueType ? OpCodes.Ldarga : OpCodes.Ldarg,
 								first
+
 							);
 							collection = new object[]
 							{
 								call_invoke,
 								_method.Parameters.Skip(1)
 									.Select(x => new {
-										OpCode = _is_by_reference && x.ParameterType.IsValueType ? OpCodes.Ldarga : OpCodes.Ldarg,
+										OpCode = _is_by_reference && x.ParameterType.IsValueType? OpCodes.Ldarga : OpCodes.Ldarg,
 										Operand = x
 									}),
+
+								// adds the return result
+								new Func<IEnumerable<object>>(() =>
+								{
+									if(_result_variable !=null)
+									{
+										return new [] {
+											new {
+												OpCode = _is_by_reference ? OpCodes.Ldloca : OpCodes.Ldloc,
+												_result_variable
+											}
+										};
+									}
+									return Enumerable.Empty<object >();
+								}).Invoke(),
+
 								new { OpCodes.Callvirt, invoke_method }
 							};
 						}
@@ -135,20 +182,6 @@ namespace Mod.Framework.Emitters
 					}).Invoke(),
 
 					store_result = store_result.Create(invoke_method.ReturnType.FullName == "System.Void" ? OpCodes.Nop : OpCodes.Pop)
-
-				//new Func<IEnumerable<object>>(() =>
-				//{
-				//	IEnumerable<object> cancellation = Enumerable.Empty<object>();
-
-				//	if (invoke_method.ReturnType.FullName != "System.Void")
-				//	{
-				//		cancellation = new[]
-				//		{
-				//			new 
-				//		};
-				//	}
-				//	return cancellation;
-				//}).Invoke()
 				).ToList();
 			}
 		}

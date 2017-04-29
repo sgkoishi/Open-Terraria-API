@@ -106,6 +106,23 @@ namespace Mod.Framework.Extensions
 
 		#region Method
 		/// <summary>
+		/// Replaces all occurrences of the current method in the assembly with the provided method
+		/// </summary>
+		/// <param name="method"></param>
+		/// <param name="replacement"></param>
+		public static void ReplaceWith(this MethodDefinition method, MethodReference replacement)
+		{
+			//Enumerates over each type in the assembly, including nested types
+			method.Module.ForEachInstruction((mth, ins) =>
+			{
+				//Compare each instruction operand value as if it were a method reference. Check to 
+				//see if they match the current method definition. If it matches, it can be swapped.
+				if (ins.Operand == method)
+					ins.Operand = replacement;
+			});
+		}
+
+		/// <summary>
 		/// Compares to see if two methods parameters are compatible
 		/// </summary>
 		/// <param name="method"></param>
