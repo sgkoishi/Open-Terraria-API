@@ -6,16 +6,16 @@ namespace OTAPI.Patcher.Modules
 	[Module("File save", "death")]
 	public class SaveModule : RunnableModule
 	{
-		private ModFramework _modder;
+		private ModFramework _framework;
 
-		public SaveModule(ModFramework modder)
+		public SaveModule(ModFramework framework)
 		{
-			_modder = modder;
+			_framework = framework;
 		}
 
 		public override void Run()
 		{
-			_modder.SaveTo("Output");
+			_framework.SaveTo("Output");
 		}
 	}
 }

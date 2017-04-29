@@ -18,39 +18,49 @@ namespace Mod.Framework
 		private StandardKernel _kernel;
 		private NugetAssemblyResolver _resolver;
 		private ReaderParameters _readerParameters;
+		private bool _initialised = false;
 
 		public List<Assembly> Assemblies { get; set; } = new List<Assembly>();
 		public List<AssemblyDefinition> CecilAssemblies { get; private set; } = new List<AssemblyDefinition>();
 
-		public string DefaultModuleGlob = @"../../../Mod.Framework.**/bin/Debug/Mod.Framework.**.dll";
+		public string DefaultModuleGlob { get; } = @"../../../Mod.Framework.**/bin/Debug/Mod.Framework.**.dll";
 
 		public ModFramework(params Assembly[] module_assemblies)
 		{
 			this.Assemblies.Add(Assembly.GetExecutingAssembly());
 			this.Assemblies.AddRange(module_assemblies);
+		}
 
-			_resolver = new NugetAssemblyResolver();
-			_readerParameters = new ReaderParameters(ReadingMode.Immediate)
+		#region Private methods
+		private void Initialise()
+		{
+			if (!_initialised)
 			{
-				AssemblyResolver = _resolver
-			};
+				_resolver = new NugetAssemblyResolver();
+				_readerParameters = new ReaderParameters(ReadingMode.Immediate)
+				{
+					AssemblyResolver = _resolver
+				};
 
-			_kernel = new StandardKernel();
+				_kernel = new StandardKernel();
 
-			_kernel.Bind<ModFramework>().ToConstant(this);
+				_kernel.Bind<ModFramework>().ToConstant(this);
 
-			LoadExternalModules();
+				LoadExternalModules();
 
-			_kernel.Bind(c => c.From(this.Assemblies)
-				.SelectAllClasses()
-				.WithAttribute<ModuleAttribute>()
-				.BindBase()
-			);
+				_kernel.Bind(c => c.From(this.Assemblies)
+					.SelectAllClasses()
+					.WithAttribute<ModuleAttribute>()
+					.BindBase()
+				);
+
+				_initialised = true;
+			}
 		}
 
 		private void LoadExternalModules()
 		{
-			this.RegisterAssemblyFiles(this.DefaultModuleGlob);
+			this.RegisterAssemblies(this.DefaultModuleGlob);
 		}
 
 		private void UpdateCecilAssemblies()
@@ -64,46 +74,28 @@ namespace Mod.Framework
 				}
 			}
 		}
+		#endregion
 
-		string EnsureCopied(FileSystemInfo file, string extension)
+		#region Public methods
+		public void RegisterAssemblies(params Assembly[] assemblies)
 		{
-			var file_path = Path.ChangeExtension(file.FullName, extension);
-			var file_name = Path.GetFileName(file_path);
-			var new_path = Path.Combine(Environment.CurrentDirectory, file_name);
-
-			try
+			foreach (var assembly in assemblies)
 			{
-				if (File.Exists(new_path))
-					File.Delete(new_path);
+				if (assembly == null || String.IsNullOrEmpty(assembly.Location))
+					throw new Exception("Invalid Location for assembly");
 
-				if (File.Exists(file.FullName))
-					File.Copy(file.FullName, new_path);
+				this.Assemblies.Add(assembly);
 			}
-			catch (Exception ex)
-			{
-
-			}
-
-			return new_path;
 		}
 
-		public void RegisterAssemblyFiles(params string[] globs)
+		public void RegisterAssemblies(params string[] globs)
 		{
 			foreach (var glob in globs)
 			{
 				foreach (var file in Glob.Glob.Expand(glob))
 				{
-					//// for debugging to pick up pdb's
-					//var file_path = EnsureCopied(file, "dll");
-					//EnsureCopied(file, "pdb");
-					//EnsureCopied(file, "xml");
-
 					var assembly = Assembly.LoadFile(file.FullName);
-
-					if (assembly == null || String.IsNullOrEmpty(assembly.Location))
-						throw new Exception($"Invalid assembly at: {file.FullName}");
-
-					this.Assemblies.Add(assembly);
+					RegisterAssemblies(assembly);
 				}
 			}
 
@@ -112,6 +104,8 @@ namespace Mod.Framework
 
 		public void RunModules()
 		{
+			this.Initialise();
+
 			foreach (RunnableModule module in _kernel.GetAll<RunnableModule>().OrderBy(x => x.Order))
 			{
 				module.Assemblies = module.AssemblyTargets.Count() == 0 ?
@@ -123,6 +117,7 @@ namespace Mod.Framework
 				module.Run();
 			}
 		}
+		#endregion
 
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls

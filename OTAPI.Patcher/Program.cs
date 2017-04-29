@@ -9,9 +9,10 @@ namespace OTAPI.Patcher
 		{
 			Console.WriteLine("Open Terraria API v3.0");
 
-			using (var mod = new ModFramework(typeof(Program).Assembly))
+			using (var framework = new ModFramework())
 			{
-				mod.RunModules();
+				framework.RegisterAssemblies(typeof(Program).Assembly);
+				framework.RunModules();
 			}
 		}
 	}

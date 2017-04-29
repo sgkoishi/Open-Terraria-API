@@ -13,11 +13,11 @@ namespace OTAPI.Patcher.Modules
 	[AssemblyTarget("Terraria, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]
 	public class CLI : RunnableModule
 	{
-		private ModFramework _modder;
+		private ModFramework _framework;
 
-		public CLI(ModFramework modder)
+		public CLI(ModFramework framework)
 		{
-			_modder = modder;
+			_framework = framework;
 		}
 
 		private HookOptions ParseFromPattern(ref string pattern)
@@ -77,7 +77,7 @@ namespace OTAPI.Patcher.Modules
 				args = new[]
 				{
 					//@"-m=[TerrariaServer]Terraria.*,[TerrariaServer]ReLogic.*/rbe",
-					@"-m=Terraria.Chest.Find*$berca",
+					@"-m=Terraria.Chest.Find*$ber",
 					@"-m=Terraria.Main.Initialize()$bec",
 					@"-a=../../../TerrariaServer.exe",
 				};
@@ -97,13 +97,13 @@ namespace OTAPI.Patcher.Modules
 				return;
 			}
 
-			_modder.RegisterAssemblyFiles(inputs.ToArray());
+			_framework.RegisterAssemblies(inputs.ToArray());
 
 			foreach (var pattern in modifications)
 			{
 				string query_pattern = pattern;
 				var flags = ParseFromPattern(ref query_pattern);
-				var res = new Query(query_pattern, _modder.CecilAssemblies)
+				var res = new Query(query_pattern, _framework.CecilAssemblies)
 					.Run()
 					.Hook(flags)
 				;

@@ -6,11 +6,11 @@ namespace OTAPI.Patcher.Modules
 	[Module("Making types public", "death")]
 	public class MakeTypesPublic : RunnableModule
 	{
-		private ModFramework _modder;
+		private ModFramework _framework;
 
-		public MakeTypesPublic(ModFramework modder)
+		public MakeTypesPublic(ModFramework framework)
 		{
-			_modder = modder;
+			_framework = framework;
 		}
 
 		public override void Run()
