@@ -6,4 +6,4 @@ install:
   - mozroots --import --sync
   - nuget restore OTAPI.Server.v3.sln
 script:
-  - xbuild /p:Configuration=Debug OTAPI.Server.v3.sln
+  - msbuild OTAPI.Server.v3.sln /verbosity:minimal 
