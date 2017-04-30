@@ -121,14 +121,10 @@ namespace Mod.Framework.Extensions
 		{
 			var context = results
 				.Select(x => x.Instance as MethodDefinition)
-				.Where(x => x != null);
+				.Where(x => x != null && x.HasBody && !x.DeclaringType.IsInterface);
 
 			foreach (var method in context)
 			{
-				if(method.Name == "ToString")
-				{
-
-				}
 				var new_method = method.Clone();
 
 				// rename method to be suffixed with Direct
@@ -138,6 +134,9 @@ namespace Mod.Framework.Extensions
 				method.Attributes &= ~MethodAttributes.Virtual;
 				method.Attributes &= ~MethodAttributes.SpecialName;
 				method.Attributes &= ~MethodAttributes.RTSpecialName;
+				method.Overrides.Clear();
+				method.CustomAttributes.Clear();
+				method.SecurityDeclarations.Clear();
 				method.ReplaceWith(new_method);
 
 				var processor = new_method.Body.GetILProcessor();
@@ -193,7 +192,7 @@ namespace Mod.Framework.Extensions
 					ins_return.ReplaceTransfer(ins_return_variable, new_method);
 				}
 
-				if (new_method.IsConstructor && new_method.HasThis)
+				if (new_method.IsConstructor && new_method.HasThis && !new_method.DeclaringType.IsValueType)
 				{
 					// move the base call instructions over to the new method.
 					var instructions = method.Body.Instructions.TakeWhile(x => x.Previous == null || x.Previous.OpCode != OpCodes.Call);
@@ -297,13 +296,47 @@ namespace Mod.Framework.Extensions
 
 			foreach (var param in method.Parameters)
 			{
-				clone.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes, param.ParameterType)
+				var parameter = new ParameterDefinition(param.Name, param.Attributes, param.ParameterType);
+				//{
+				//	HasConstant = param.HasConstant,
+				//	HasDefault = param.HasDefault,
+				//	Constant = param.Constant
+				//};
+
+				if (param.HasConstant)
 				{
-					HasConstant = param.HasConstant,
-					HasDefault = param.HasDefault,
-					Constant = param.Constant
-				});
+					parameter.HasConstant = true;
+					parameter.Constant = param.Constant;
+				}
+				if (param.HasDefault)
+				{
+					parameter.HasDefault = true;
+				}
+
+				clone.Parameters.Add(parameter);
 			}
+
+			foreach (var method_ref in method.Overrides)
+			{
+				clone.Overrides.Add(method_ref);
+			}
+
+			foreach (var param in method.GenericParameters)
+			{
+				clone.GenericParameters.Add(param);
+			}
+
+			foreach (var attribute in method.CustomAttributes)
+			{
+				clone.CustomAttributes.Add(attribute);
+			}
+
+			foreach (var security_declaration in method.SecurityDeclarations)
+			{
+				clone.SecurityDeclarations.Add(security_declaration);
+			}
+
+			//clone.PInvokeInfo = method.PInvokeInfo;
 
 			return clone;
 		}

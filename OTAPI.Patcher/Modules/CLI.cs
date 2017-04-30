@@ -76,17 +76,15 @@ namespace OTAPI.Patcher.Modules
 			{
 				args = new[]
 				{
-					//@"-m=[TerrariaServer]Terraria.*,[TerrariaServer]ReLogic.*/rbe",
+					////@"-m=[TerrariaServer]Terraria.*,[TerrariaServer]ReLogic.*/rbe",
 					//@"-m=Terraria.Chest.Find*$berca",
 					@"-m=Terraria.Chest.*$berca",
 					@"-m=Terraria.Main.Initialize()$bec",
 					@"-m=Terraria.MessageBuffer.GetData(System.Int32,System.Int32,System.Int32&)$berca",
-					//@"-m=Terraria.NetMessage.Send*$berca",
-					//@"-m=Terraria.NetMessage.R*$berca",
-					//@"-m=Terraria.NetMessage.g*$berca",
-					//@"-m=Terraria.NetMessage.C*$berca",
 					@"-m=Terraria.NetMessage.*$berca",
-					@"-m=ReLogic.OS.Platform..cctor*$berca",
+					//@"-m=ReLogic.OS.Platform..cctor*$berca",
+					//@"-m=Terraria.* && ReLogic.*$berca",
+					//@"-m=Terraria.Net.*",
 					@"-a=../../../TerrariaServer.exe",
 					@"-a=../../../ReLogic.dll",
 				};

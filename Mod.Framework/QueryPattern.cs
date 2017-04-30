@@ -55,7 +55,10 @@ namespace Mod.Framework
 		{
 			StringBuilder string_builder = new StringBuilder();
 
-			foreach (var segment in text.Split(new[] { "&&" }, StringSplitOptions.RemoveEmptyEntries))
+			foreach (var segment in text
+				.Split(new[] { "&&" }, StringSplitOptions.RemoveEmptyEntries)
+				.Select(x => x.Trim())
+			)
 			{
 				var pattern = new QueryPattern();
 				var state = State.ReadingFullName;

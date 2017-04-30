@@ -112,7 +112,8 @@ namespace Mod.Framework.Extensions
 		/// <returns></returns>
 		public static string GetSafeName(this MethodDefinition method)
 		{
-			return method.Name.Replace(".", String.Empty);
+			//return method.Name.Replace(".", String.Empty);
+			return method.Name.TrimStart('.');
 		}
 
 		/// <summary>
@@ -129,6 +130,23 @@ namespace Mod.Framework.Extensions
 				//see if they match the current method definition. If it matches, it can be swapped.
 				if (ins.Operand == method)
 					ins.Operand = replacement;
+
+				var generic_method = ins.Operand as GenericInstanceMethod;
+				if (generic_method != null)
+				{
+					if (generic_method.ElementMethod == method)
+					{
+						var replacement_instance = new GenericInstanceMethod(replacement);
+
+						foreach (var item in generic_method.GenericArguments)
+							replacement_instance.GenericArguments.Add(item);
+
+						foreach (var item in generic_method.GenericParameters)
+							replacement_instance.GenericParameters.Add(item);
+
+						ins.Operand = replacement_instance;
+					}
+				}
 			});
 		}
 
