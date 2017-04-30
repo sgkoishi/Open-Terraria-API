@@ -104,9 +104,29 @@ namespace Mod.Framework.Emitters
 						{
 							collection = new object[]
 							{
-								_method.Parameters
-									.Select(x => new { OpCodes.Ldarg, x }),
-								call_invoke = call_invoke.Create(OpCodes.Callvirt, invoke_method)
+								// adds the return result
+								new Func<IEnumerable<object>>(() =>
+								{
+									if(_result_variable !=null)
+									{
+										return new object [] {
+											call_invoke = call_invoke.Create(
+												_is_by_reference ? OpCodes.Ldloca : OpCodes.Ldloc,
+												_result_variable
+											),
+
+											new { OpCodes.Callvirt, invoke_method }
+										};
+									}
+									else
+									{
+										return new []
+										{
+
+											call_invoke = call_invoke.Create(OpCodes.Callvirt, invoke_method)
+										};
+									}
+								}).Invoke()
 							};
 						}
 
@@ -174,14 +194,37 @@ namespace Mod.Framework.Emitters
 						{
 							collection = new object[]
 							{
-								call_invoke = call_invoke.Create(OpCodes.Callvirt, invoke_method)
+								new Func<IEnumerable<object>>(() =>
+								{
+									if(_result_variable !=null)
+									{
+										return new object [] {
+											call_invoke = call_invoke.Create(
+												_is_by_reference ? OpCodes.Ldloca : OpCodes.Ldloc,
+												_result_variable
+											),
+
+											new { OpCodes.Callvirt, invoke_method }
+										};
+									}
+									else
+									{
+										return new []
+										{
+
+											call_invoke = call_invoke.Create(OpCodes.Callvirt, invoke_method)
+										};
+									}
+								}).Invoke()
 							};
 						}
 
 						return collection;
 					}).Invoke(),
 
-					store_result = store_result.Create(invoke_method.ReturnType.FullName == "System.Void" ? OpCodes.Nop : OpCodes.Pop)
+					store_result = store_result.Create(
+						invoke_method.ReturnType.FullName == "System.Void" ? OpCodes.Nop : OpCodes.Pop
+					)
 				).ToList();
 			}
 		}

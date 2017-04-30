@@ -43,7 +43,7 @@ namespace Mod.Framework.Extensions
 			hooks_delegates_type.NestedTypes.Add(hook_handler);
 
 			// generate the api hook external modules can attach to
-			var hook_field = new FieldDefinition("Pre" + method.Name, FieldAttributes.Public | FieldAttributes.Static, hook_handler);
+			var hook_field = new FieldDefinition("Pre" + method.GetSafeName(), FieldAttributes.Public | FieldAttributes.Static, hook_handler);
 			hooks_type.Fields.Add(hook_field);
 
 			// generate the call to the delegate
@@ -99,13 +99,12 @@ namespace Mod.Framework.Extensions
 			hooks_delegates_type.NestedTypes.Add(hook_handler);
 
 			// generate the api hook external modules can attach to
-			var hook_field = new FieldDefinition("Post" + method.Name, FieldAttributes.Public | FieldAttributes.Static, hook_handler);
+			var hook_field = new FieldDefinition("Post" + method.GetSafeName(), FieldAttributes.Public | FieldAttributes.Static, hook_handler);
 			hooks_type.Fields.Add(hook_field);
 
 			// generate the call to the delegate
 			var hook_emitter = new HookEmitter(hook_field, method, false, false, result_variable);
 			var result = hook_emitter.Emit();
-			//instructions.MergeInto(method, 0);
 
 			// end of method
 
@@ -126,12 +125,19 @@ namespace Mod.Framework.Extensions
 
 			foreach (var method in context)
 			{
+				if(method.Name == "ToString")
+				{
+
+				}
 				var new_method = method.Clone();
 
 				// rename method to be suffixed with Direct
 				method.Name += "Direct";
+				method.Name = method.GetSafeName();
 				method.DeclaringType.Methods.Add(new_method);
 				method.Attributes &= ~MethodAttributes.Virtual;
+				method.Attributes &= ~MethodAttributes.SpecialName;
+				method.Attributes &= ~MethodAttributes.RTSpecialName;
 				method.ReplaceWith(new_method);
 
 				var processor = new_method.Body.GetILProcessor();
@@ -185,6 +191,18 @@ namespace Mod.Framework.Extensions
 					var ins_return_variable = Instruction.Create(OpCodes.Ldloc, return_variable);
 					processor.InsertBefore(ins_return, ins_return_variable);
 					ins_return.ReplaceTransfer(ins_return_variable, new_method);
+				}
+
+				if (new_method.IsConstructor && new_method.HasThis)
+				{
+					// move the base call instructions over to the new method.
+					var instructions = method.Body.Instructions.TakeWhile(x => x.Previous == null || x.Previous.OpCode != OpCodes.Call);
+
+					foreach (var instruction in instructions.Reverse())
+					{
+						method.Body.Instructions.Remove(instruction);
+						new_method.Body.Instructions.Insert(0, instruction);
+					}
 				}
 			}
 
@@ -272,11 +290,19 @@ namespace Mod.Framework.Extensions
 		/// <returns>The new cloned method</returns>
 		public static MethodDefinition Clone(this MethodDefinition method)
 		{
-			var clone = new MethodDefinition(method.Name, method.Attributes, method.ReturnType);
+			var clone = new MethodDefinition(method.Name, method.Attributes, method.ReturnType)
+			{
+				ImplAttributes = method.ImplAttributes
+			};
 
 			foreach (var param in method.Parameters)
 			{
-				clone.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes, param.ParameterType));
+				clone.Parameters.Add(new ParameterDefinition(param.Name, param.Attributes, param.ParameterType)
+				{
+					HasConstant = param.HasConstant,
+					HasDefault = param.HasDefault,
+					Constant = param.Constant
+				});
 			}
 
 			return clone;

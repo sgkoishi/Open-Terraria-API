@@ -106,6 +106,16 @@ namespace Mod.Framework.Extensions
 
 		#region Method
 		/// <summary>
+		/// Returns a cleaned name that can be used to add a new method into a type
+		/// </summary>
+		/// <param name="method">Method whose name needs cleaning</param>
+		/// <returns></returns>
+		public static string GetSafeName(this MethodDefinition method)
+		{
+			return method.Name.Replace(".", String.Empty);
+		}
+
+		/// <summary>
 		/// Replaces all occurrences of the current method in the assembly with the provided method
 		/// </summary>
 		/// <param name="method"></param>

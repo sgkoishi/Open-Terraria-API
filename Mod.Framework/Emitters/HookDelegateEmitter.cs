@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using Mod.Framework.Extensions;
+using Mono.Cecil;
 using System.Linq;
 
 namespace Mod.Framework.Emitters
@@ -51,7 +52,7 @@ namespace Mod.Framework.Emitters
 				: _method.DeclaringType.Module.TypeSystem.Void;
 
 			var delegate_emitter = new DelegateEmitter(
-				_prefix + _method.Name,
+				_prefix + _method.GetSafeName(),
 				return_type,
 				delegate_parameters,
 				_method.DeclaringType.Module

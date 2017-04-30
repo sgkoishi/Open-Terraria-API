@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace OTAPI.v3.Demo.Server
 {
 	class Program
 	{
+
 		static void Main(string[] args)
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += ResolveTerrariaReferences;
@@ -27,6 +29,19 @@ namespace OTAPI.v3.Demo.Server
 				messageType = 0;
 				Console.WriteLine(nameof(ModFramework.ModHooks.MessageBuffer.PreGetData));
 				return true;
+			};
+			ModFramework.ModHooks.NetMessage.Precctor = () =>
+			{
+				Console.WriteLine("NetMessage initialising");
+				return true;
+			};
+			ModFramework.ModHooks.NetMessage.Postcctor = () =>
+			{
+				Console.WriteLine("NetMessage initialised. NetMessage.buffer.length:" + Terraria.NetMessage.buffer.Length);
+			};
+			ModFramework.ModHooks.Chest.Postctor = (bool bank) =>
+			{
+				Console.WriteLine("New Chest initialised. bank:" + bank);
 			};
 			#endregion
 
