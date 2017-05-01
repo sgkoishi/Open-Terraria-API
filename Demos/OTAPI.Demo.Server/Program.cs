@@ -6,7 +6,6 @@ namespace OTAPI.v3.Demo.Server
 {
 	class Program
 	{
-
 		static void Main(string[] args)
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += ResolveTerrariaReferences;
@@ -17,6 +16,24 @@ namespace OTAPI.v3.Demo.Server
 			{
 				Console.WriteLine($"{nameof(ModFramework.ModHooks.Chest.PreFindChest)} X={x},Y={y},r={result}");
 				return true;
+			};
+			ModFramework.ModHooks.Main.Precctor = () =>
+			{
+				Console.WriteLine(nameof(ModFramework.ModHooks.Main.Precctor));
+				return true;
+			};
+			ModFramework.ModHooks.Main.Postcctor = () =>
+			{
+				Console.WriteLine(nameof(ModFramework.ModHooks.Main.Postcctor));
+			};
+			ModFramework.ModHooks.Main.Prector = () =>
+			{
+				Console.WriteLine(nameof(ModFramework.ModHooks.Main.Prector));
+				return true;
+			};
+			ModFramework.ModHooks.Main.Postctor = () =>
+			{
+				Console.WriteLine(nameof(ModFramework.ModHooks.Main.Postctor));
 			};
 			ModFramework.ModHooks.Main.PreInitialize = () =>
 			{

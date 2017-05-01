@@ -121,7 +121,12 @@ namespace Mod.Framework.Extensions
 		{
 			var context = results
 				.Select(x => x.Instance as MethodDefinition)
-				.Where(x => x != null && x.HasBody && !x.DeclaringType.IsInterface);
+				.Where(
+					x => x != null
+					&& x.HasBody
+					&& !x.DeclaringType.IsInterface
+					&& x.GenericParameters.Count == 0
+				);
 
 			foreach (var method in context)
 			{
@@ -192,10 +197,15 @@ namespace Mod.Framework.Extensions
 					ins_return.ReplaceTransfer(ins_return_variable, new_method);
 				}
 
+				// for all classes (not structs) we need to move the base type constructor over to the new
+				// method before any of our hook code is executed.
 				if (new_method.IsConstructor && new_method.HasThis && !new_method.DeclaringType.IsValueType)
 				{
-					// move the base call instructions over to the new method.
-					var instructions = method.Body.Instructions.TakeWhile(x => x.Previous == null || x.Previous.OpCode != OpCodes.Call);
+					var instructions = method.Body.Instructions.TakeWhile(
+						x => x.Previous == null
+						|| x.Previous.OpCode != OpCodes.Call
+						|| (x.Previous.Operand as MethodReference).FullName != method.DeclaringType.BaseType.Resolve().Method(".ctor").FullName
+					);
 
 					foreach (var instruction in instructions.Reverse())
 					{
