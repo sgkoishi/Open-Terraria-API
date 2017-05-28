@@ -3,7 +3,7 @@ using OTAPI.Patcher.Extensions;
 
 namespace OTAPI.Patcher.Modules
 {
-	[Module("File save", "death")]
+	[Module("File save", "death", 100)]
 	public class SaveModule : RunnableModule
 	{
 		private ModFramework _framework;

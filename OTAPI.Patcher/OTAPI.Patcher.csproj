@@ -70,6 +70,7 @@
     <Compile Include="Modules\CLI.cs" />
     <Compile Include="Modules\MakeTypesPublic.cs" />
     <Compile Include="Modules\Save.cs" />
+    <Compile Include="Modules\Tile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

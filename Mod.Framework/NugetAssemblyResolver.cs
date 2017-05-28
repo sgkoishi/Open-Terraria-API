@@ -69,7 +69,7 @@ namespace Mod.Framework
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($" * NuGet resolution failed on {name}");
+				Console.WriteLine($" * NuGet resolution failed on {name}\n{ex}");
 				package = null;
 			}
 

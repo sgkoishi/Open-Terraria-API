@@ -7,7 +7,7 @@ using System.Linq;
 namespace Mod.Framework
 {
 	/// <summary>
-	/// Provides the ability to merge method generated IL into another method
+	/// Provides the ability to merge a methods IL into another method
 	/// </summary>
 	public class MergableMethod
 	{

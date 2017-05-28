@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyExpander.cs" />
+    <Compile Include="Emitters\InterfaceEmitter.cs" />
     <Compile Include="Emitters\CallEmitter.cs" />
     <Compile Include="Emitters\CSharpEmitter.cs" />
     <Compile Include="Emitters\DelegateEmitter.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Emitters\IEmitter.cs" />
     <Compile Include="Emitters\PropertyEmitter.cs" />
     <Compile Include="Extensions\Cecil.Extensions.cs" />
+    <Compile Include="Extensions\Replacement.Extensions.cs" />
     <Compile Include="HookOptions.cs" />
     <Compile Include="Extensions\Hooking.Extensions.cs" />
     <Compile Include="Glob.cs" />

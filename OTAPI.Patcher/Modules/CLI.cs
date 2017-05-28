@@ -31,9 +31,9 @@ namespace OTAPI.Patcher.Modules
 				pattern = segments[0];
 
 				var character_flags = segments[1].ToCharArray();
-				foreach(var flag in character_flags)
+				foreach (var flag in character_flags)
 				{
-					switch(flag)
+					switch (flag)
 					{
 						case 'b': // begin hook
 							flags |= HookOptions.Pre;
@@ -76,17 +76,17 @@ namespace OTAPI.Patcher.Modules
 			{
 				args = new[]
 				{
-					////@"-m=[TerrariaServer]Terraria.*,[TerrariaServer]ReLogic.*/rbe",
-					//@"-m=Terraria.Chest.Find*$berca",
-					@"-m=Terraria.Chest..ctor*$berca",
-					@"-m=Terraria.Chest.*$berca",
-					@"-m=Terraria.Main..c*$berca",
+					//////@"-m=[TerrariaServer]Terraria.*,[TerrariaServer]ReLogic.*/rbe",
+					////@"-m=Terraria.Chest.Find*$berca",
+					//@"-m=Terraria.Chest..ctor*$berca",
+					//@"-m=Terraria.Chest.*$berca",
+					//@"-m=Terraria.Main..c*$berca",
 					@"-m=Terraria.Main.Initialize()*$berca",
-					@"-m=Terraria.MessageBuffer.GetData(System.Int32,System.Int32,System.Int32&)$berca",
-					@"-m=Terraria.NetMessage.*$berca",
-					@"-m=ReLogic.OS.Platform..cctor*$berca",
-					//@"-m=Terraria.* && ReLogic.*$berca",
-					@"-m=Terraria.Net.*",
+					//@"-m=Terraria.MessageBuffer.GetData(System.Int32,System.Int32,System.Int32&)$berca",
+					//@"-m=Terraria.NetMessage.*$berca",
+					//@"-m=ReLogic.OS.Platform..cctor*$berca",
+					////@"-m=Terraria.* && ReLogic.*$berca",
+					//@"-m=Terraria.Net.*",
 					@"-a=../../../TerrariaServer.exe",
 					@"-a=../../../ReLogic.dll",
 				};
@@ -108,14 +108,29 @@ namespace OTAPI.Patcher.Modules
 
 			_framework.RegisterAssemblies(inputs.ToArray());
 
+			//var t2 = new Query("NATUPNPLib.IStaticPortMapping", this.Assemblies).Run().Single().Instance as Mono.Cecil.TypeDefinition;
+			//var t = new Query("Terraria.Chat.IChatProcessor", this.Assemblies).Run().Single().Instance as Mono.Cecil.TypeDefinition;
+			//var tile = new Query("Terraria.Tile", this.Assemblies).Run().Single().Instance as Mono.Cecil.TypeDefinition;
+			//foreach(var field in tile.Fields.Where(x => !x.HasConstant))
+			//{
+			//	field.FieldToProperty();
+			//}
+			//var i = new Mod.Framework.Emitters.InterfaceEmitter(tile);
+			//var inte = i.Emit();
+			//inte.Namespace = "OTAPI.Tile";
+			////tile.Module.Types.Add(inte);
+
 			foreach (var pattern in modifications)
 			{
+				Console.WriteLine($"\t-> Running query: {pattern}");
+				var query_start = DateTime.Now;
 				string query_pattern = pattern;
 				var flags = ParseFromPattern(ref query_pattern);
 				var res = new Query(query_pattern, this.Assemblies)
 					.Run()
 					.Hook(flags)
 				;
+				Console.WriteLine($"\t\t-> Took: {(DateTime.Now - query_start).TotalMilliseconds}ms");
 			}
 
 			//var q = new Query("[TerrariaServer]Terraria.*&&[TerrariaServer]ReLogic.*", _modder.Assemblies);

@@ -158,7 +158,8 @@ namespace Mod.Framework
 			List<MetaData> meta = null;
 			if (!_assembly_cache.TryGetValue(assembly.FullName, out meta) || meta == null)
 			{
-				Console.Write($"Expanding assembly {assembly.FullName}...");
+				Console.Write($"Expanding assembly {assembly.Name}...");
+				var expand_start = DateTime.Now;
 
 				if (add) this._results.Add(new MetaData()
 				{
@@ -172,12 +173,11 @@ namespace Mod.Framework
 					Expand(module);
 				}
 
-				System.Console.WriteLine($"found {this._results.Count} item(s)");
+				System.Console.WriteLine($"found {this._results.Count} item(s). Took {(DateTime.Now - expand_start).TotalMilliseconds}ms");
 				_assembly_cache.Add(assembly.FullName, this._results);
 			}
 			else
 			{
-				Console.WriteLine($"Cache hit for assembly: {assembly.FullName}");
 				this._results = meta;
 			}
 		}

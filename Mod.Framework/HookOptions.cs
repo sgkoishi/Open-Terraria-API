@@ -17,6 +17,6 @@ namespace Mod.Framework
 		ReferenceParameters = 4,
 		AlterResult = 8,
 
-		Cancellable = 16 // only applie to Pre hooks
+		Cancellable = 16 // only applies to Pre hooks
 	}
 }

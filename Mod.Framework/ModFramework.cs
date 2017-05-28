@@ -3,7 +3,6 @@ using Ninject;
 using Ninject.Extensions.Conventions;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 
