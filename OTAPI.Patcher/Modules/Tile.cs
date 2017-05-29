@@ -20,8 +20,7 @@ namespace OTAPI.Patcher.Modules
 			var tile = new Query("Terraria.Tile", this.Assemblies).Run().Single().Instance as Mono.Cecil.TypeDefinition;
 			foreach (var field in tile.Fields.Where(x => !x.HasConstant))
 			{
-				var property = field.FieldToProperty();
-				property.AsVirtual();
+				var property = field.ChangeToProperty().AsVirtual();
 				field.ReplaceWith(property);
 			}
 

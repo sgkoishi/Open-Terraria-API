@@ -11,7 +11,7 @@ namespace Mod.Framework.Extensions
 {
 	public static class ReplacementExtension
 	{
-		public static PropertyDefinition FieldToProperty(this FieldDefinition field)
+		public static PropertyDefinition ChangeToProperty(this FieldDefinition field)
 		{
 			var emitter = new PropertyEmitter(field.Name, field.FieldType, field.DeclaringType,
 				getterAttributes: MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.SpecialName,
@@ -33,12 +33,14 @@ namespace Mod.Framework.Extensions
 			return emitter.Emit();
 		}
 
-		public static void AsVirtual(this PropertyDefinition property)
+		public static PropertyDefinition AsVirtual(this PropertyDefinition property)
 		{
 			if (property.GetMethod != null)
 				property.GetMethod.IsVirtual = property.GetMethod.IsNewSlot = true;
 			if (property.SetMethod != null)
 				property.SetMethod.IsVirtual = property.SetMethod.IsNewSlot = true;
+
+			return property;
 		}
 
 		public static void ReplaceWith(this TypeDefinition currentType, TypeDefinition replacement)
