@@ -7,6 +7,10 @@ using System.Reflection;
 
 namespace OTAPI.Patcher.Modules
 {
+	/// <summary>
+	/// This module will prepare the program to patch TerrariaServer.exe.
+	/// It should grab anything the program needs from the official binaries.
+	/// </summary>
 	[Module("Command line arguments", "death", -1)]
 	[AssemblyTarget("TerrariaServer, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]
 	[AssemblyTarget("Terraria, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]

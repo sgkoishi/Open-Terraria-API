@@ -3,6 +3,9 @@ using Mod.Framework.Extensions;
 
 namespace OTAPI.Patcher.Modules
 {
+	/// <summary>
+	/// This module will iterate over each type defined by the registered assemblies, while transforming all hidden members into public members.
+	/// </summary>
 	[Module("Making types public", "death")]
 	public class MakeTypesPublic : RunnableModule
 	{

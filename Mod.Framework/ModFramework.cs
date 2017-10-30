@@ -62,6 +62,10 @@ namespace Mod.Framework
 			this.RegisterAssemblies(this.DefaultModuleGlob);
 		}
 
+		/// <summary>
+		/// Syncs any .NET assemblies, to cecil assemblies
+		/// </summary>
+		/// <returns></returns>
 		private bool UpdateCecilAssemblies()
 		{
 			bool updated = false;
@@ -82,6 +86,10 @@ namespace Mod.Framework
 		#endregion
 
 		#region Public methods
+		/// <summary>
+		/// Registers the provided assembies for use within the framework
+		/// </summary>
+		/// <param name="assemblies"></param>
 		public void RegisterAssemblies(params Assembly[] assemblies)
 		{
 			foreach (var assembly in assemblies)
@@ -95,6 +103,10 @@ namespace Mod.Framework
 			this.UpdateCecilAssemblies();
 		}
 
+		/// <summary>
+		/// Registers the provided assembies for use within the framework
+		/// </summary>
+		/// <param name="globs"></param>
 		public void RegisterAssemblies(params string[] globs)
 		{
 			foreach (var glob in globs)
@@ -109,6 +121,9 @@ namespace Mod.Framework
 			this.UpdateCecilAssemblies();
 		}
 
+		/// <summary>
+		/// Runs each registered module in sequence
+		/// </summary>
 		public void RunModules()
 		{
 			this.Initialise();

@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace OTAPI.Patcher.Modules
 {
+	/// <summary>
+	/// This module will generate a new OTAPI.Tile interface based off Terraria.Tile.
+	/// It will then make Terraria.Tile extend OTAPI.Tile, and replace any Terraria.Tile reference with OTAPI.Tile so that tile implementations can be hot swappable.
+	/// </summary>
 	[Module("Tile change", "death")]
 	public class TileModule : RunnableModule
 	{
