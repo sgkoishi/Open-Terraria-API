@@ -12,7 +12,7 @@ namespace Mod.Framework
 	{
 		public string Name { get; private set; }
 
-		public string Author { get; private set; }
+		public string[] Authors { get; private set; }
 
 		public int Order { get; private set; }
 
@@ -33,7 +33,7 @@ namespace Mod.Framework
 			)).Select(x => x.AssemblyName);
 
 			this.Name = attribute.Name;
-			this.Author = attribute.Author;
+			this.Authors = attribute.Authors;
 			this.Order = attribute.Order;
 		}
 

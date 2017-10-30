@@ -10,14 +10,21 @@ namespace Mod.Framework
 	{
 		public string Name { get; set; }
 
-		public string Author { get; set; }
+		public string[] Authors { get; set; }
 
 		public int Order { get; set; }
 
 		public ModuleAttribute(string name = null, string author = null, int order = 10)
 		{
 			this.Name = name;
-			this.Author = author;
+			this.Authors = new[] { author };
+			this.Order = order;
+		}
+
+		public ModuleAttribute(string name = null, string[] authors = null, int order = 10)
+		{
+			this.Name = name;
+			this.Authors = authors;
 			this.Order = order;
 		}
 	}

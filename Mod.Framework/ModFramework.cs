@@ -62,16 +62,22 @@ namespace Mod.Framework
 			this.RegisterAssemblies(this.DefaultModuleGlob);
 		}
 
-		private void UpdateCecilAssemblies()
+		private bool UpdateCecilAssemblies()
 		{
-			foreach (var assembly in this.Assemblies)
+			bool updated = false;
+			if (_readerParameters != null)
 			{
-				if (!CecilAssemblies.Any(x => x.FullName == assembly.FullName))
+				foreach (var assembly in this.Assemblies)
 				{
-					var def = AssemblyDefinition.ReadAssembly(assembly.Location, _readerParameters);
-					CecilAssemblies.Add(def);
+					if (!CecilAssemblies.Any(x => x.FullName == assembly.FullName))
+					{
+						var def = AssemblyDefinition.ReadAssembly(assembly.Location, _readerParameters);
+						CecilAssemblies.Add(def);
+						updated = true;
+					}
 				}
 			}
+			return updated;
 		}
 		#endregion
 
@@ -85,6 +91,8 @@ namespace Mod.Framework
 
 				this.Assemblies.Add(assembly);
 			}
+
+			this.UpdateCecilAssemblies();
 		}
 
 		public void RegisterAssemblies(params string[] globs)
