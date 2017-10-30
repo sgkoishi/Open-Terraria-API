@@ -8,6 +8,9 @@ using System.Reflection;
 
 namespace OTAPI.Patcher.Modules
 {
+	/// <summary>
+	/// This module will handle any command line data such as what assemblies and query patterns
+	/// </summary>
 	[Module("Command line arguments", "death")]
 	[AssemblyTarget("TerrariaServer, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]
 	[AssemblyTarget("Terraria, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]
