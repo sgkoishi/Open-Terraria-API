@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace OTAPI.Patcher.Modules
 {
-	[Module("Command line arguments", "death")]
+	[Module("Command line arguments", "death", -1)]
 	[AssemblyTarget("TerrariaServer, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]
 	[AssemblyTarget("Terraria, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null")]
 	public class Setup : RunnableModule
