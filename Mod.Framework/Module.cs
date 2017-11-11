@@ -10,31 +10,35 @@ namespace Mod.Framework
 	/// </summary>
 	public abstract class Module : IDisposable
 	{
-		public string Name { get; private set; }
+		public string Name => attribute.Name;
 
-		public string[] Authors { get; private set; }
+		public string[] Authors => attribute.Authors;
 
-		public int Order { get; private set; }
+		public int Order => attribute.Order;
 
+		/// <summary>
+		/// Defines which Assembly Names the modification applies to.
+		/// </summary>
 		public IEnumerable<String> AssemblyTargets { get; set; }
 
 		public IEnumerable<AssemblyDefinition> Assemblies { get; set; }
 
+		protected ModuleAttribute attribute;
+
 		public Module()
 		{
-			ModuleAttribute attribute = (ModuleAttribute)Attribute.GetCustomAttribute(
+			attribute = (ModuleAttribute)Attribute.GetCustomAttribute(
 				this.GetType(),
 				typeof(ModuleAttribute)
 			);
+
+			if (attribute == null)
+				throw new NotSupportedException($"The {nameof(ModuleAttribute)} declaration is missing, please add it to your module.");
 
 			AssemblyTargets = ((AssemblyTargetAttribute[])Attribute.GetCustomAttributes(
 				this.GetType(),
 				typeof(AssemblyTargetAttribute)
 			)).Select(x => x.AssemblyName);
-
-			this.Name = attribute.Name;
-			this.Authors = attribute.Authors;
-			this.Order = attribute.Order;
 		}
 
 		public virtual void Dispose() { }

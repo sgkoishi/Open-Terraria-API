@@ -69,10 +69,11 @@
   <ItemGroup>
     <Compile Include="Extensions\ModFramework.Extensions.cs" />
     <Compile Include="Modules\CLI.cs" />
+    <Compile Include="Modules\ITileCollection.cs" />
     <Compile Include="Modules\MakeTypesPublic.cs" />
     <Compile Include="Modules\Save.cs" />
     <Compile Include="Modules\Setup.cs" />
-    <Compile Include="Modules\Tile.cs" />
+    <Compile Include="Modules\ITile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

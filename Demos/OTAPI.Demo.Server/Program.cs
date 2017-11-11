@@ -67,14 +67,21 @@ namespace OTAPI.v3.Demo.Server
 				// LoaderExceptions then you must put Terraria's implementation here and wrap try/catch
 				// until you find the problematic IL
 				Terraria.Program.ForceLoadAssembly(typeof(Terraria.Program).Assembly, true);
-
+				Console.ReadKey();
 				// start the application
 				Terraria.WindowsLaunch.Main(args);
+			}
+			catch (ReflectionTypeLoadException ex)
+			{
+				foreach (var e in ex.LoaderExceptions)
+					Console.WriteLine(e);
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex);
 			}
+
+			Console.ReadKey();
 		}
 
 		private static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)

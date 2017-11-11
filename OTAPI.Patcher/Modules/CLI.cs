@@ -79,17 +79,17 @@ namespace OTAPI.Patcher.Modules
 			{
 				args = new[]
 				{
-					//////@"-m=[TerrariaServer]Terraria.*,[TerrariaServer]ReLogic.*/rbe",
-					////@"-m=Terraria.Chest.Find*$berca",
-					//@"-m=Terraria.Chest..ctor*$berca",
-					//@"-m=Terraria.Chest.*$berca",
-					//@"-m=Terraria.Main..c*$berca",
+					////@"-m=[TerrariaServer]Terraria.*,[TerrariaServer]ReLogic.*/rbe",
+					//@"-m=Terraria.Chest.Find*$berca",
+					@"-m=Terraria.Chest..ctor*$berca",
+					@"-m=Terraria.Chest.*$berca",
+					@"-m=Terraria.Main..c*$berca",
 					@"-m=Terraria.Main.Initialize()*$berca",
-					//@"-m=Terraria.MessageBuffer.GetData(System.Int32,System.Int32,System.Int32&)$berca",
-					//@"-m=Terraria.NetMessage.*$berca",
-					//@"-m=ReLogic.OS.Platform..cctor*$berca",
-					////@"-m=Terraria.* && ReLogic.*$berca",
-					//@"-m=Terraria.Net.*",
+					@"-m=Terraria.MessageBuffer.GetData(System.Int32,System.Int32,System.Int32&)$berca",
+					@"-m=Terraria.NetMessage.*$berca",
+					@"-m=ReLogic.OS.Platform..cctor*$berca",
+					//@"-m=Terraria.* && ReLogic.*$berca",
+					@"-m=Terraria.Net.*",
 					@"-a=../../../TerrariaServer.exe",
 					@"-a=../../../ReLogic.dll",
 				};

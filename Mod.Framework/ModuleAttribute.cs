@@ -13,19 +13,23 @@ namespace Mod.Framework
 		public string[] Authors { get; set; }
 
 		public int Order { get; set; }
+		
+		public Type[] Dependencies { get; set; }
 
-		public ModuleAttribute(string name = null, string author = null, int order = 10)
+		public ModuleAttribute(string name = null, string author = null, int order = 10, params Type[] dependsOn)
 		{
 			this.Name = name;
 			this.Authors = new[] { author };
 			this.Order = order;
+			this.Dependencies = dependsOn;
 		}
 
-		public ModuleAttribute(string name = null, string[] authors = null, int order = 10)
+		public ModuleAttribute(string name = null, string[] authors = null, int order = 10, params Type[] dependsOn)
 		{
 			this.Name = name;
 			this.Authors = authors;
 			this.Order = order;
+			this.Dependencies = dependsOn;
 		}
 	}
 }
