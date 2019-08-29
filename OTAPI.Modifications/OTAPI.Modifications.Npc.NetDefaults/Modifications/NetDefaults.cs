@@ -7,7 +7,8 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Npc
     public class NetDefaults : ModificationBase
     {
         public override System.Collections.Generic.IEnumerable<string> AssemblyTargets => new[]
-        {
+		{
+			"Terraria, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null",
             "TerrariaServer, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null",
             "Terraria, Version=1.3.4.4, Culture=neutral, PublicKeyToken=null"
         };

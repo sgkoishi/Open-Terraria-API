@@ -65,8 +65,8 @@ namespace OTAPI.Tile
 		void lava(bool lava);
 		bool honey();
 		void honey(bool honey);
-		bool wire4();
-		void wire4(bool wire4);
+//		bool wire4();
+//		void wire4(bool wire4);
 		int wallFrameX();
 		void wallFrameX(int wallFrameX);
 		byte frameNumber();
@@ -98,6 +98,6 @@ namespace OTAPI.Tile
 		byte slope();
 		void slope(byte slope);
 
-		string ToString();
+//		string ToString();
 	}
 }

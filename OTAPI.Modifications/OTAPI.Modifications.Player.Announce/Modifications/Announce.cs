@@ -13,6 +13,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Player
 	/// </summary>
 	public class Announce : ModificationBase
 	{
+		// TODO: Port to 1.3.0.7
 		public override System.Collections.Generic.IEnumerable<string> AssemblyTargets => new[]
 		{
 			"TerrariaServer, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null"
@@ -52,4 +53,6 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Player
 			}
 		}
 	}
+	
+
 }

@@ -6,8 +6,9 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Net
     public class SendData : ModificationBase
     {
         public override System.Collections.Generic.IEnumerable<string> AssemblyTargets => new[]
-        {
-            "TerrariaServer, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null"
+		{
+			"Terraria, Version=1.3.0.7, Culture=neutral, PublicKeyToken=null",
+            "TerrariaServer, Version=1.3.0.7, Culture=neutral, PublicKeyToken=null"
         };
         public override string Description => "Hooking NetMessage.SendData...";
 
@@ -17,7 +18,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Net
             float tmpF = 0;
             Terraria.Localization.NetworkText tmpS = null;
 
-            var vanilla = this.Method(() => Terraria.NetMessage.SendData(0, -1, -1, Terraria.Localization.NetworkText.Empty, 0, 0, 0, 0, 0, 0, 0));
+            var vanilla = this.Method(() => Terraria.NetMessage.SendData(0, -1, -1, "", 0, 0, 0, 0, 0, 0, 0));
             var callback = this.Method(() => OTAPI.Callbacks.Terraria.NetMessage.SendData(
                 ref tmpI, ref tmpI, ref tmpI, ref tmpS, ref tmpI, ref tmpF, ref tmpF, ref tmpF, ref tmpI, ref tmpI, ref tmpI
             ));

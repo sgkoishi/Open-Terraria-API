@@ -12,7 +12,8 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Collision
 	{
 		public override System.Collections.Generic.IEnumerable<string> AssemblyTargets => new[]
 		{
-			"TerrariaServer, Version=1.3.5.3, Culture=neutral, PublicKeyToken=null"
+			"Terraria, Version=1.3.0.7, Culture=neutral, PublicKeyToken=null",
+			"TerrariaServer, Version=1.3.0.7, Culture=neutral, PublicKeyToken=null"
 		};
 		public override string Description => @"Hooking MessageBuffer.GetData\PressurePlate...";
 
@@ -43,8 +44,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Collision
 			);
 
 			//Skip over SetCurrentUser, then remove all instructions until the SendData call is removed
-			var from = call
-				.Next(x => x.OpCode == OpCodes.Call && (x.Operand as MethodReference).Name == "SetCurrentUser");
+			var from = call;
 			var stopAt = from
 				.Next(x => x.OpCode == OpCodes.Call && (x.Operand as MethodReference).Name == "SendData").Next;
 			for (;;)
