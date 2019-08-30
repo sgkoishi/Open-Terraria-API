@@ -60,7 +60,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Npc
 				);
 
 				//Create the value to hold the new item id
-				var vrbItemId = new VariableDefinition("otaItem", (cbkBegin.Parameters[0].ParameterType as ByReferenceType).ElementType);
+				var vrbItemId = new VariableDefinition((cbkBegin.Parameters[0].ParameterType as ByReferenceType).ElementType);
 				dropLoot.Body.Variables.Add(vrbItemId);
 
 				il.Emit(OpCodes.Ldloca_S, vrbItemId); //Loads our variable by reference so our callback and alter it.

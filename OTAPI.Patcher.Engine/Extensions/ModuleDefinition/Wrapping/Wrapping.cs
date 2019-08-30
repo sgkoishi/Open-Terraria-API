@@ -22,7 +22,7 @@ namespace OTAPI.Patcher.Engine.Extensions
 			//Enumerates over each type in the assembly, including nested types
 			method.Module.ForEachInstruction((mth, ins) =>
 			{
-				//Compare each instruction operand value as if it were a method reference. Check to 
+				//Compare each instruction operand value as if it were a method reference. Check to
 				//see if they match the current method definition. If it matches, it can be swapped.
 				if (ins.Operand == method)
 					ins.Operand = replacement;
@@ -70,7 +70,6 @@ namespace OTAPI.Patcher.Engine.Extensions
 
 				//Update the new target to take the old targets place
 				newTarget.Offset = current.Offset;
-				newTarget.SequencePoint = current.SequencePoint;
 				newTarget.Offset++; //TODO: spend some time to figure out why this is incrementing
 			}
 		}
@@ -115,7 +114,7 @@ namespace OTAPI.Patcher.Engine.Extensions
 				var wrapped = new MethodDefinition(current.Name, current.Attributes, current.ReturnType);
 				var instanceMethod = (current.Attributes & MethodAttributes.Static) == 0;
 
-				//Rename the existing method, and replace all references to it so that the new 
+				//Rename the existing method, and replace all references to it so that the new
 				//method receives the calls instead.
 				current.Name = current.Name + WrappedMethodNameSuffix;
 				//If we are renaming a virtual method, it does not need to be virtual anymore
@@ -140,7 +139,7 @@ namespace OTAPI.Patcher.Engine.Extensions
 				//Generate the il that will call and handle the begin callback.
 				var beginResult = wrapped.EmitBeginCallback(beginCallback, instanceMethod, allowCallbackInstance, beginIsCancellable);
 
-				//Emit the il that will execute the actual method that was renamed earlier 
+				//Emit the il that will execute the actual method that was renamed earlier
 				var insFirstForMethod = wrapped.EmitMethodCallback(current, instanceMethod, current.ReturnType.Name != current.Module.TypeSystem.String.Name);
 
 				//If the begin callback is cancelable, the EmitBeginCallback method will have left a Nop
@@ -184,9 +183,9 @@ namespace OTAPI.Patcher.Engine.Extensions
 		}
 
 		/// <summary>
-		/// Injects a cancelable (boolean) callback into the current method with the ability to return a value from the 
+		/// Injects a cancelable (boolean) callback into the current method with the ability to return a value from the
 		/// method using a custom variable.
-		/// 
+		///
 		/// The callback must expect an instance parameter if the current method is instanced.
 		/// Additionally, it must also have the result value by reference before any of the current method parameters are specified.
 		/// </summary>
@@ -206,7 +205,7 @@ namespace OTAPI.Patcher.Engine.Extensions
 
 			//Create our variable, to hold the modified callback result
 			VariableDefinition vrbResult = null;
-			current.Body.Variables.Add(vrbResult = new VariableDefinition("otapi_result", current.ReturnType));
+			current.Body.Variables.Add(vrbResult = new VariableDefinition(current.ReturnType));
 
 			//If the current method is an instance method, we insert the 'this'/ldarg_0 value
 			//for the callback.

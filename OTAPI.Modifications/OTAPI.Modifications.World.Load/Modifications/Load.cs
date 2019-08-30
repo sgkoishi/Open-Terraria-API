@@ -17,7 +17,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.World.IO
 		public override string Description => "Hooking WorldFile.loadWorld(bool)...";
 		public override void Run()
 		{
-			var vanilla = this.Method(() => Terraria.IO.WorldFile.loadWorld(false));
+			var vanilla = this.SourceDefinition.MainModule.Type("Terraria.IO.WorldFile").Method("loadWorld");
 
 			bool tmp = false;
 			var cbkBegin = this.Method(() => OTAPI.Callbacks.Terraria.WorldFile.LoadWorldBegin(ref tmp));
@@ -37,7 +37,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.World.IO
 			var exType = this.SourceDefinition.MainModule.Import(
 				typeof(Exception)
 			);
-			var exVariable = new VariableDefinition("exceptionObject", exType);
+			var exVariable = new VariableDefinition(exType);
 
 			vanilla.Body.Variables.Add(exVariable);
 

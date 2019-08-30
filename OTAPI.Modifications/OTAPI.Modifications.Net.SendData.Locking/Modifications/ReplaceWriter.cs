@@ -21,7 +21,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Net
 
 		public override void Run()
 		{
-			// find the first writer and then remove all instructions up 
+			// find the first writer and then remove all instructions up
 			// until (an including) the writer position being reset to 0
 
 			var sendData = this.Method(() => Terraria.NetMessage.SendData(0, 0, 0, Terraria.Localization.NetworkText.Empty, 0, 0, 0, 0, 0, 0, 0));
@@ -52,7 +52,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Net
 			//processor.Remove(buffer);
 
 			//VariableDefinition mswriter;
-			sendData.Body.Variables.Add(mswriter = new VariableDefinition("mswriter",
+			sendData.Body.Variables.Add(mswriter = new VariableDefinition(
 				this.SourceDefinition.MainModule.Import(typeof(MemoryStream))
 			));
 
@@ -101,7 +101,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Net
 			);
 
 			VariableDefinition packetContents;
-			sendData.Body.Variables.Add(packetContents = new VariableDefinition("packetContents",
+			sendData.Body.Variables.Add(packetContents = new VariableDefinition(
 				this.SourceDefinition.MainModule.Import(typeof(byte[]))
 			));
 
@@ -163,7 +163,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Net
 				//	// the local buffer is now in place
 				//	// we now need to send it off to the writer, instead of simply incrementing
 
-				//	// remove all tiles AFTER 
+				//	// remove all tiles AFTER
 				//}
 			}
 		}

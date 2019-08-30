@@ -30,7 +30,7 @@ namespace OTAPI.Patcher.Engine.Extensions
 			var il = current.Body.GetILProcessor();
 
 			//If the callback expects the instance to be passed through, then we add the keyword 'this'
-			//onto the call stack. 
+			//onto the call stack.
 			//This also expects that the current method is an instance method.
 			if (instanceMethod)
 				il.Emit(OpCodes.Ldarg_0);
@@ -70,7 +70,7 @@ namespace OTAPI.Patcher.Engine.Extensions
 				current.EmitMethodEnding();
 			}
 			//If the callback has a return type and it has not been handled
-			//we must pop the result value from the stack or it will cause 
+			//we must pop the result value from the stack or it will cause
 			//an exception
 			else if (importedCallback.ReturnType.Name != importedCallback.Module.TypeSystem.Void.Name)
 			{
@@ -146,7 +146,7 @@ namespace OTAPI.Patcher.Engine.Extensions
 			if (false == noHandling && method.ReturnType.Name != method.Module.TypeSystem.Void.Name)
 			{
 				VariableDefinition vr1;
-				method.Body.Variables.Add(vr1 = new VariableDefinition("cancelDefault", method.ReturnType));
+				method.Body.Variables.Add(vr1 = new VariableDefinition(method.ReturnType));
 
 				//Initialise the variable
 				il.Append(firstInstruction = il.Create(OpCodes.Ldloca_S, vr1));
