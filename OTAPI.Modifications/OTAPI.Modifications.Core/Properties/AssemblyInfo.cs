@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("OTAPI.Core")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("OTAPI.Core")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
@@ -25,7 +24,7 @@ using System.Runtime.InteropServices;
 
 /*
  * These are here as OTAPI's callbacks (from vanilla to otapi) are internals.
- * This is not an issue when you run the merged OTAPI.dll, but when you wish to debug something 
+ * This is not an issue when you run the merged OTAPI.dll, but when you wish to debug something
  * you need to run the OTAPI.Core.dll,OTAPI.Xna.dll & TerrariaServer.exe beside each other.
  * This is where the problem lies, so we must allow the terraria assemblies.
  */

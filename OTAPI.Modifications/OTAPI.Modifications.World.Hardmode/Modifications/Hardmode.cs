@@ -14,7 +14,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.World
 		public override string Description => "Hooking WorldGen.StartHardmode()...";
 		public override void Run()
 		{
-			var vanilla = this.Method(() => Terraria.WorldGen.StartHardmode());
+			var vanilla = this.SourceDefinition.MainModule.Type("Terraria.WorldGen").Method("StartHardmode");
 
 			var cbkBegin = this.Method(() => OTAPI.Callbacks.Terraria.WorldGen.HardmodeBegin());
 			var cbkEnd = this.Method(() => OTAPI.Callbacks.Terraria.WorldGen.HardmodeEnd());

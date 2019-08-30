@@ -31,7 +31,7 @@ namespace OTAPI.Modification.Tile.Modifications
 //			}
 
 			//Make Terraria.Tile implement ITile
-			terrariaTile.Interfaces.Add(importedITile);
+			terrariaTile.Interfaces.Add(new InterfaceImplementation(importedITile));
 
 			#region Tile constructor
 			//Swap all tile constructors to the OTAPI callback

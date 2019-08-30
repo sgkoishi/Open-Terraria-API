@@ -21,7 +21,7 @@ namespace OTAPI.Callbacks.Terraria
 
 		/// <summary>
 		/// Creates an ITile instance using the defaul Terraria.Tile constructor.
-		/// 
+		///
 		/// This cannot be performed at compile time using the OTAPI solution as
 		/// Terraria.Tile does not implement ITile at compile time.
 		/// </summary>
@@ -39,7 +39,7 @@ namespace OTAPI.Callbacks.Terraria
 
 		/// <summary>
 		/// Creates an ITile instance using the defaul Terraria.Tile constructor.
-		/// 
+		///
 		/// This cannot be performed at compile time using the OTAPI solution as
 		/// Terraria.Tile does not implement ITile at compile time.
 		/// </summary>
@@ -50,8 +50,7 @@ namespace OTAPI.Callbacks.Terraria
 			{
 				typeof(OTAPI.Tile.ITile)
 			});
-
-			dm.DefineParameter(0, System.Reflection.ParameterAttributes.In, "copy");
+			// dm.DefineParameter(0, System.Reflection.ParameterAttributes.In, "copy");
 			var processor = dm.GetILGenerator();
 
 			processor.Emit(OpCodes.Ldarg_0);
@@ -63,7 +62,7 @@ namespace OTAPI.Callbacks.Terraria
 
 		/// <summary>
 		/// Replaces all Terraria.Tile initialisation calls in the terraria assembly.
-		/// 
+		///
 		/// If null is returned from the handler, a default Terraria.Tile instance will be created.
 		/// </summary>
 		/// <returns>An instance of ITile</returns>
@@ -74,7 +73,7 @@ namespace OTAPI.Callbacks.Terraria
 
 		/// <summary>
 		/// Replaces all Terraria.Tile initialisation calls in the terraria assembly.
-		/// 
+		///
 		/// If null is returned from the handler, a default Terraria.Tile instance will be created.
 		/// </summary>
 		/// <returns>An instance of ITile</returns>

@@ -25,7 +25,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.Net
 			var exType = this.SourceDefinition.MainModule.Import(
 				typeof(Exception)
 			);
-			var exVariable = new VariableDefinition("exceptionObject", exType);
+			var exVariable = new VariableDefinition(exType);
 
 			vanilla.Body.Variables.Add(exVariable);
 

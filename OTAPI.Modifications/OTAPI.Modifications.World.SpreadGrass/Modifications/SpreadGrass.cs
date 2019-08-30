@@ -15,7 +15,7 @@ namespace OTAPI.Patcher.Engine.Modifications.Hooks.World
 			int tmpi = 0;
 			bool tmpb = false;
 			byte tmp8 = 0;
-			var vanilla = this.Method(() => Terraria.WorldGen.SpreadGrass(0, 0, 0, 0, false, 0));
+			var vanilla = this.SourceDefinition.MainModule.Type("Terraria.WorldGen").Method("SpreadGrass");
 			var callback = this.Method(() => OTAPI.Callbacks.Terraria.World.SpreadGrass(ref tmpi, ref tmpi, ref tmpi, ref tmpi, ref tmpb, ref tmp8));
 
 			vanilla.Wrap
